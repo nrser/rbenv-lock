@@ -1,0 +1,5 @@
+---
+qb/project:
+  setup: false
+  hub: true
+  private: false
