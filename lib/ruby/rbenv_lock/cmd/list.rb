@@ -1,0 +1,56 @@
+# frozen_string_literal: true
+
+# Declarations
+# =======================================================================
+
+module RbenvLock; end
+module RbenvLock::Cmd; end
+
+
+# Definitions
+# =======================================================================
+
+# List locks.
+# 
+class RbenvLock::Cmd::List < RbenvLock::Cmd::Base
+  NAME = 'list'
+  
+  DESCRIPTION = "List locks."
+  
+  USAGE = "rbenv lock list [OPTIONS]"
+  
+  OPTIONS = {
+    long: [
+      '-l', '--long',
+      "Print lock details (YAML format)"
+    ],
+  }
+  
+  def on_run
+    debug "RUNNING `list` command...", argv: argv
+    
+    locks = RbenvLock::Lock.list
+    
+    if options[:long]
+      require 'yaml'
+      
+      data = locks.map { |lock|
+        {
+          'bin'     => lock.bin,
+          'ruby'    => lock.ruby_version,
+          'gem'     => lock.gem_name,
+          'gemset'  => lock.gemset,
+          'path'    => lock.path,
+          'target'  => lock.target,
+        }.reject { |k, v| v.nil? }
+      }
+      
+      out YAML.dump( data )
+      
+    else
+      
+      locks.each { |lock| out "#{ lock.bin }: #{ lock.ruby_version }" }
+    end
+  end
+  
+end # class RbenvLock::Cmd::List

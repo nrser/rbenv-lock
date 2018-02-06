@@ -6,6 +6,12 @@ require 'yaml'
 require 'open3'
 
 
+# Declarations
+# =======================================================================
+
+module RbenvLock; end
+
+
 # Definitions
 # =======================================================================
 
@@ -15,9 +21,120 @@ class RbenvLock::Lock
   # Constants
   # ======================================================================
   
+  # {Regexp} to match lock bin file lines that export ENV vars.
+  # 
+  # @return [Regexp]
+  # 
+  EXPORT_QUOTED_LINE_RE = \
+    /export\s+(?<name>[^=])+=(?<quote>['"])(?<value>[^\k<quote>]*)\k<quote>/
+  
+  EXPORT_UNQUOTED_LINE_RE = \
+    /export\s+(?<name>[^=])+=(?<quote>['"])(?<value>[^\k<quote>]*)\k<quote>/
+    
+  
+  
+  # Mixins
+  # ============================================================================
+  
+  include RbenvLock::Output
+  
   
   # Class Methods
   # ======================================================================
+  
+  # Get the path to the lock file for a `bin` filename.
+  # 
+  # @example
+  #   # When...
+  #   RbenvLock::Env.locks_dir
+  #   # => "/Users/nrser/.rbenv/locks"
+  #   
+  #   # Then
+  #   RbenvLock::Lock.path_for 'blah'
+  #   # => "/Users/nrser/.rbenv/locks/blah"
+  # 
+  # @param [String] bin
+  #   The bin filename you want the path for.
+  # 
+  # @return [String]
+  #   Absolute path to lock bin file.
+  # 
+  def self.path_for bin
+    File.join RbenvLock::Env.locks_dir, bin
+  end
+  
+  
+  def self.read bin
+    if File.file?( bin )
+      path = File.expand_path bin
+      bin = File.basename path
+    else
+      path = path_for bin
+      
+      unless File.file? path
+        return nil
+      end
+    end
+    
+    exports = {}
+    
+    File.read( path ).lines.each do |line|
+      tokens = line.shellsplit
+      
+      # Discard comment, if any
+      if index = tokens.index( '#' )
+        tokens = tokens[0...index]
+      end
+      
+      # Process commands we care about
+      case tokens[0]
+      when 'export'
+        # Split `name=value` export expressions and add them to `exports` hash
+        tokens[1..-1].map { |expr|
+          unless expr.include? '='
+            warn "Doesn't look like a Bash `export` variable set",
+              expression: expr,
+              from_lock_bin: path
+          end
+          
+          name, value = expr.split '=', 2
+          exports[name] = value
+        }
+      when 'exec'
+        # TODO  Maybe we want to save this?
+      end
+    end
+    
+    new bin,
+        exports['RBENV_VERSION'],
+        path: path,
+        gemset: exports['RBENV_GEMSETS'],
+        gem_name: exports['RBENV_LOCK_GEM']
+  end
+  
+  
+  def self.list
+    locks_dir = RbenvLock::Env.locks_dir
+    
+    return [] unless File.directory?( locks_dir )
+    
+    locks = []
+    
+    Dir.foreach( locks_dir ) { |filename|
+      path = File.join locks_dir, filename
+      
+      if !filename.start_with?( '.' ) && File.file?( path )
+        begin
+          locks << read( path )
+        rescue Exception => error
+          warn "Failed to load lock bin file",
+            path: path
+        end
+      end
+    }
+    
+    locks
+  end
   
   
   # Attributes
@@ -36,6 +153,7 @@ class RbenvLock::Lock
     @gemset = options[:gemset]
     @gem_name = options[:gem_name]
     @gem_version = options[:gem_version]
+    @path = options[:path]
     @direct = false
   end # #initialize
   
@@ -43,30 +161,36 @@ class RbenvLock::Lock
   # Instance Methods
   # ======================================================================
   
-  # Are we using the risky but maybe much faster "direct" execution???
+  # @return [Boolean]
+  #   Are we using the risky but maybe much faster "direct" execution???
   def direct?
     @direct
   end
   
   
-  # The path to the lock file
-  def path
-    @path ||= File.join RbenvLock.locks_dir, bin
-  end
-  
-  
+  # @return [Boolean]
+  #   Do we have a {#gemset}?
   def gemset?
     !!gemset
   end
   
   
+  # @return [Boolean]
+  #   Do we have a {#gem_name}?
   def gem?
     !!gem_name
   end
   
   
+  # @return [String]
+  #   Absolute path to the lock file
+  def path
+    @path ||= self.class.path_for bin
+  end
+  
+  
   def gemset_root
-    return nil unless gemset
+    return nil unless gemset?
     
     @gemset_root ||= File.join \
       RbenvLock.rbenv_prefix( ruby_version ),
@@ -316,6 +440,10 @@ class RbenvLock::Lock
       ensure_gem if gem?
     end
     
+    unless File.directory? RbenvLock::Env.locks_dir
+      FileUtils.mkdir_p( RbenvLock::Env.locks_dir )
+    end
+    
     File.open path, 'w' do |file|
       file.puts "#!/usr/bin/env bash"
       file.puts
@@ -324,7 +452,6 @@ class RbenvLock::Lock
       }
       file.puts
       file.puts %{exec #{ target.quote } "$@"}
-      file.puts
     end
     
     FileUtils.chmod 0755, path
@@ -332,9 +459,8 @@ class RbenvLock::Lock
   
   
   def create options = {}
-    if  options[:force] ||
-        !File.exists?( path )
-      write
+    if options[:force] || !File.exists?( path )
+      write options
     else
       raise "Lock file exists: #{ path }, use --force to overwrite"
     end
