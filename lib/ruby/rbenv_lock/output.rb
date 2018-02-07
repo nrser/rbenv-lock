@@ -2,7 +2,7 @@
 
 # Requirements
 # =======================================================================
-
+require 'pp'
 
 
 # Declarations
@@ -50,9 +50,22 @@ module RbenvLock::Output
       end
       
       output = msgs.join ' '
-      values.each { |name, value|
-        output += "\n  #{ name }: #{ value.inspect }"
-      }
+      
+      unless values.empty?
+        values.each { |name, value|
+          dump = value.pretty_inspect.chomp
+          
+          lines = dump.lines
+          
+          if lines.length > 1
+            dump = "\n" + lines.map { |line|
+              "    " + line
+            }.join
+          end
+        
+          output += "\n  #{ name }: #{ dump }"
+        }
+      end
       
       io.puts output
     end
@@ -72,6 +85,11 @@ module RbenvLock::Output
     def debug *args
       return unless debug?
       err "DEBUG [rbenv-lock]", *args
+    end
+    
+    
+    def info *args
+      err *args
     end
     
     

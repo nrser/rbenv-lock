@@ -13,6 +13,16 @@ require_relative './base'
 
 # List locks.
 # 
+# @example 1.  Basic usage
+#       rbenv lock list
+#   
+#   Output looks like `<BIN>: <VERSION>`.
+# 
+# @example 2.  List details
+#       rbenv lock list --long
+#   
+#   Lock details are written in YAML format.
+# 
 class RbenvLock::Cmd::List < RbenvLock::Cmd::Base
   NAME = 'list'
   

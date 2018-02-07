@@ -16,7 +16,7 @@ require_relative './base'
 # @example 1.  Basic usage
 #   Lock the `qb` bin to Ruby 2.3.6
 #   
-#       rbenv lock 2.3.6 qb
+#       rbenv lock add 2.3.6 qb
 #   
 # @example 2.  "Full" example
 #   Isolate the `qb` bin from the gem of the same name in a gemset (also of
@@ -27,23 +27,23 @@ require_relative './base'
 #   Gemset will be created if it doesn't exist, and gem will be installed in
 #   if it isn't present.
 #   
-#       rbenv lock 2.3.6 qb --gem=qb --gemset=qb
+#       rbenv lock add 2.3.6 qb --gem=qb --gemset=qb
 #   
 # @example 3.  "Full" example with inferred gem and gemset names
 #   Since often times the gem and executable names are the same and that name
 #   is a natural choice for an isolating gemset name the `gem` and `gemset`
 #   values can be inferred:
 #   
-#       rbenv lock 2.3.6 qb --gem --gemset
+#       rbenv lock add 2.3.6 qb --gem --gemset
 #   
 #   Exactly the same result as example (2).
 # 
-class RbenvLock::Cmd::Create < RbenvLock::Cmd::Base
-  NAME = 'create'
+class RbenvLock::Cmd::Add < RbenvLock::Cmd::Base
+  NAME = 'add'
   
-  DESCRIPTION = "Create a lock (or overwrite one with `--force`)"
+  DESCRIPTION = "Add a lock (or overwrite one with `--force`)"
   
-  USAGE = "rbenv lock create VERSION BIN [OPTIONS]"
+  USAGE = "rbenv lock #{ NAME } VERSION BIN [OPTIONS]"
   
   DEFAULTS = {
     force: false,

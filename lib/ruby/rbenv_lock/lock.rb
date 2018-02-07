@@ -387,7 +387,7 @@ class RbenvLock::Lock
     # in..?
     env, args, opts = prep_for_spawn args
     
-    RbenvLock.debug "streaming...",
+    debug "streaming...",
       env: env,
       args: args,
       opts: opts
@@ -396,6 +396,18 @@ class RbenvLock::Lock
     
     Process.wait pid
     return $?
+  end
+  
+  
+  def exec *args
+    env, args, opts = prep_for_spawn args
+    
+    debug "exec'ing...",
+      env: env,
+      args: args,
+      opts: opts
+    
+    Process.exec env, *args, opts
   end
   
   
@@ -467,6 +479,29 @@ class RbenvLock::Lock
   end
   
   
+  def remove options = {}
+    FileUtils.rm path
+    info "Lock #{ bin } bin at #{ path } removed."
+    
+    if options[:gemset]
+      if gemset?
+        FileUtils.rm_rf gemset_root
+        info "Gemset #{ gemset } at #{ gemset_root } removed."
+      else
+        warn "Lock #{ bin } does not have a gemset, can't remove"
+      end
+    elsif options[:gem]
+      if gem?
+        info "Removing gem #{ gem_name } from Ruby #{ ruby_version }..."
+        stream which( 'gem' ), 'uninstall', gem_name
+        info "Gem #{ gem_name } removed from Ruby #{ ruby_version }."
+      else
+        warn "Lock #{ bin } does not have an associated gem, can't remove."
+      end
+    end
+  end
+  
+  
   protected
   # ========================================================================
     
@@ -507,6 +542,12 @@ class RbenvLock::Lock
       
       # Default options; need to clear out the ENV so that any rbenv-ness that
       # is existing in this process doesn't muck up the sub-processes
+      # 
+      # TODO  I'm not sure if this is the right way to go... I've got {#exec}
+      #       working without it by joining the command tokens so it gets
+      #       run in a shell, and that seems to work nice... though maybe
+      #       it's better to have this super-clean predicable env?
+      # 
       opts = {unsetenv_others: true}
       
       if args[-1].is_a? Hash
