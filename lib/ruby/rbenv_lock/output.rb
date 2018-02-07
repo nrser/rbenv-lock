@@ -78,6 +78,11 @@ module RbenvLock::Output
     def warn *args
       err "WARN  [rbenv-lock]", *args
     end
+    
+    
+    def error *args
+      err "ERROR [rbenv-lock]", *args
+    end
 
 
     def fatal *args
@@ -88,7 +93,7 @@ module RbenvLock::Output
         args = args[0..-2]
       end
       
-      err "ERROR", *args
+      error *args
       
       if options[:help]
         err

@@ -21,8 +21,14 @@ class RbenvLock::Cmd::Base
   
   include RbenvLock::Output
   
+  ALIASES = []
   DEFAULTS = {}
   OPTIONS = {}
+  
+  
+  def self.names
+    [self::NAME] + self::ALIASES
+  end
   
   
   attr_reader :argv, :args, :options
@@ -63,7 +69,8 @@ class RbenvLock::Cmd::Base
         
         parser.on(
           '-q', '--quiet',
-          "Be quiet - don't write messages to STDOUT (errors, warnings, etc.)",
+          "Be quiet - don't write messages to STDOUT",
+          "(help, errors, warnings, etc.)",
           " ",
           "Non-empty RBENV_LOCK_QUIET does the same thing.",
           " ",

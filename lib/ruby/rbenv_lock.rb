@@ -124,22 +124,19 @@ module RbenvLock
   def self.run cmd, *argv
     debug "Starting run...", cmd: cmd, argv: argv
     
-    case cmd
-    when 'help', '-h', '--help'
-      help_cmd argv
+    RbenvLock::Cmd.all.each do |cmd_class|
+      debug "Switching command...",
+        cmd_class: cmd_class,
+        names: cmd_class.names,
+        cmd: cmd
       
-    when 'list', 'ls'
-      RbenvLock::Cmd::List.new( argv ).run!
-      
-    when 'create'
-      RbenvLock::Cmd::Create.new( argv ).run!
-      
-    when 'remove', 'rm'
-      raise "TODO"
-      
-    else
-      fatal "Bad command: #{ cmd.inspect }"
+      if cmd_class.names.include? cmd
+        return cmd_class.new( argv ).run!
+      end
     end
+    
+    fatal "Bad command: #{ cmd.inspect }"
+    
   end
   
 end

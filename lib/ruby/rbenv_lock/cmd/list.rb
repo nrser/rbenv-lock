@@ -1,10 +1,11 @@
 # frozen_string_literal: true
 
-# Declarations
+# Requirements
 # =======================================================================
 
-module RbenvLock; end
-module RbenvLock::Cmd; end
+# Project / Package
+# -----------------------------------------------------------------------
+require_relative './base'
 
 
 # Definitions
@@ -14,6 +15,8 @@ module RbenvLock::Cmd; end
 # 
 class RbenvLock::Cmd::List < RbenvLock::Cmd::Base
   NAME = 'list'
+  
+  ALIASES = ['ls']
   
   DESCRIPTION = "List locks."
   
