@@ -76,40 +76,56 @@ class RbenvLock::Lock
       end
     end
     
-    exports = {}
+    ruby_version = nil
+    options = {
+      path: path,
+      gemset: nil,
+      gem_name: nil,
+      env: {},
+    }
     
-    File.read( path ).lines.each do |line|
-      tokens = line.shellsplit
-      
-      # Discard comment, if any
-      if index = tokens.index( '#' )
-        tokens = tokens[0...index]
-      end
-      
-      # Process commands we care about
-      case tokens[0]
-      when 'export'
-        # Split `name=value` export expressions and add them to `exports` hash
-        tokens[1..-1].map { |expr|
-          unless expr.include? '='
-            warn "Doesn't look like a Bash `export` variable set",
-              expression: expr,
-              from_lock_bin: path
-          end
-          
-          name, value = expr.split '=', 2
-          exports[name] = value
-        }
-      when 'exec'
-        # TODO  Maybe we want to save this?
-      end
-    end
+    File.read( path ).lines.
+      # Drop comment lines 'cause `#shellsplit` can choke on them
+      reject { |line|
+        line =~ /\A\s*\#/
+      }.
+      each do |line|
+        tokens = line.shellsplit
+        
+        # Discard comment, if any
+        if index = tokens.index( '#' )
+          tokens = tokens[0...index]
+        end
+        
+        # Process commands we care about
+        case tokens[0]
+        when 'export'
+          # Split `name=value` export expressions and add them to `exports` hash
+          tokens[1..-1].map { |expr|
+            unless expr.include? '='
+              warn "Doesn't look like a Bash `export` variable set",
+                expression: expr,
+                from_lock_bin: path
+            end
+            
+            name, value = expr.split '=', 2
+            
+            if name == 'RBENV_VERSION'
+              ruby_version = value
+            elsif name == 'RBENV_GEMSETS'
+              options[:gemset] = value
+            elsif name == 'RBENV_LOCK_GEM'
+              options[:gem_name] = value
+            else
+              options[:env][name] = value
+            end
+          }
+        when 'exec'
+          # TODO  Maybe we want to save this?
+        end
+      end # each line
     
-    new bin,
-        exports['RBENV_VERSION'],
-        path: path,
-        gemset: exports['RBENV_GEMSETS'],
-        gem_name: exports['RBENV_LOCK_GEM']
+    new bin, ruby_version, options
   end
   
   
@@ -154,6 +170,7 @@ class RbenvLock::Lock
     @gem_name = options[:gem_name]
     @gem_version = options[:gem_version]
     @path = options[:path]
+    @env = options[:env] || {}
     @direct = false
   end # #initialize
   
@@ -327,6 +344,9 @@ class RbenvLock::Lock
       # I don't think we need the version? It's just for installing?
     end
     
+    # Add any extra env vars
+    lock_env.merge! @env
+    
     lock_env
   end
   
@@ -383,8 +403,6 @@ class RbenvLock::Lock
   # @return [Process::Status]
   # 
   def stream *args
-    # Ugh, I can't believe I'm writing this again... how is this not just built
-    # in..?
     env, args, opts = prep_for_spawn args
     
     debug "streaming...",
