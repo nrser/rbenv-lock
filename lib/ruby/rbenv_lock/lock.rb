@@ -64,6 +64,13 @@ class RbenvLock::Lock
   end
   
   
+  # Load a {Lock} instance for a bin filename.
+  # 
+  # @param [String] bin
+  #   The bin filename you want a {Lock} instantiated for.
+  # 
+  # @return [RbenvLock::Lock]
+  # 
   def self.read bin
     if File.file?( bin )
       path = File.expand_path bin
@@ -127,8 +134,13 @@ class RbenvLock::Lock
     
     new bin, ruby_version, options
   end
+
   
-  
+  # Get a list of all locks.
+  # 
+  # @return [Array<RbenvLock::Lock>]
+  #   {Lock} instances for each bin shim found.
+  # 
   def self.list
     locks_dir = RbenvLock::Env.locks_dir
     
@@ -150,7 +162,7 @@ class RbenvLock::Lock
     }
     
     locks
-  end
+  end # .list
   
   
   # Attributes
