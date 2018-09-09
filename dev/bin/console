@@ -1,0 +1,47 @@
+#!/usr/bin/env ruby
+
+require 'pathname'
+
+# Add `//lib` to the load path
+$LOAD_PATH.unshift File.expand_path( '../../lib/ruby', __dir__ )
+
+
+# Load `nrser` gem and use refinements if it's available
+begin
+  require 'nrser'
+rescue LoadError => error
+  puts "WARN -- Failed to load `nrser` gem."
+  puts "WARN -- Add it do your dependencies or edit #{ __FILE__ }"
+else
+  require 'nrser/core_ext'
+  require 'nrser/refinements/types'
+  using NRSER::Types
+end
+
+require 'rbenv_lock'
+
+if defined? NRSER
+  NRSER::Log.setup_for_console!( application: 'rbenv_lock-console' )
+end
+
+Pathname.
+  glob( RbenvLock::ROOT / 'dev' / 'scratch' / 'console' / '**' / '*.rb' ).
+  each { |path|
+    puts "[Loading #{ path }]"
+    load path.to_s
+  }
+
+
+# Load `pry` if it's available, falling back to `irb`
+begin
+  require "pry"
+rescue LoadError => error
+  puts "WARN -- Failed to load `pry` gem."
+  puts "WARN -- Add it do your dependencies or edit #{ __FILE__ }"
+  puts "INFO -- Starting `IRB`..."
+  
+  require "irb"
+  IRB.start
+else
+  Pry.start
+end

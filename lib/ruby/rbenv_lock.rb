@@ -14,12 +14,13 @@ class Object
 end
 
 module RbenvLock
-  
+
   # Constants
-  # ============================================================================
-  
-  
-  
+  # ========================================================================
+
+  ROOT = Pathname.new( __dir__ ).join( '..', '..' ).expand_path
+
+
   # Mixins
   # ============================================================================
   
@@ -105,14 +106,6 @@ module RbenvLock
   end
   
   
-  def self.add_common_options parser
-
-  end
-  
-  
-
-  
-  
   # Sub-Commands
   # ----------------------------------------------------------------------------
   
@@ -139,4 +132,4 @@ module RbenvLock
     
   end
   
-end
+end # module RbenvLock
