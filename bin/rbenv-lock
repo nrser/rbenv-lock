@@ -3,14 +3,16 @@
 #               into `rbenv`, which I'm sure would cause monstrous problems,
 #               rivaled only by the conundrum of writing correct fast bash
 #               scripts ;)
-##
 # 
+##############################################################################
+# 
+# rbenv Lock Plugin - Secure the gems that provide your important executables
 # 
 # @example Working now - isolate single executable gem in own gemset
 #   # `qb` bin from gem and in gemset of same name locked to Ruby 2.3.6
 #   rbenv lock create 2.3.6 qb --gemset --gem=qb
 # 
-#   # The gemset name is infered from the gem name
+#   # The gemset name is inferred from the gem name
 # 
 # @example TODO - infer gem *and* gemset name from bin name
 #   rbenv lock create 2.3.6 qb --gem --gemset
@@ -40,7 +42,7 @@
 # 
 # @example ...?
 # 
-##
+##############################################################################
 
 require_relative '../lib/ruby/rbenv_lock'
 
