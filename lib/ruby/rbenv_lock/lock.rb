@@ -69,7 +69,11 @@ class RbenvLock::Lock
   # @param [String] bin
   #   The bin filename you want a {Lock} instantiated for.
   # 
+  # @return [nil]
+  #   When `bin` was not found.
+  # 
   # @return [RbenvLock::Lock]
+  #   When the `bin` was found and successfully loaded.
   # 
   def self.read bin
     if File.file?( bin )
