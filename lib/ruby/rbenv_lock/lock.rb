@@ -6,17 +6,17 @@ require 'yaml'
 require 'open3'
 
 
-# Declarations
+# Namespace
 # =======================================================================
 
-module RbenvLock; end
+module RbenvLock
 
 
 # Definitions
 # =======================================================================
 
 # @todo document RbenvLock::Lock class.
-class RbenvLock::Lock
+class Lock
   
   # Constants
   # ======================================================================
@@ -87,6 +87,17 @@ class RbenvLock::Lock
       end
     end
     
+    contents = File.read path
+    
+    if contents =~ /\A\#\!\S+\s+bash/
+      read_bash path, bin, contents
+    else
+      read_yaml path, bin, contents
+    end
+  end
+  
+  
+  def self.read_bash path, bin, contents
     ruby_version = nil
     options = {
       path: path,
@@ -95,7 +106,7 @@ class RbenvLock::Lock
       env: {},
     }
     
-    File.read( path ).lines.
+    contents.lines.
       # Drop comment lines 'cause `#shellsplit` can choke on them
       reject { |line|
         line =~ /\A\s*\#/
@@ -136,7 +147,29 @@ class RbenvLock::Lock
         end
       end # each line
     
-    new bin, ruby_version, options
+    new bin, ruby_version, bin, options
+  end
+  
+  
+  def self.read_yaml path, bin, contents
+    data = YAML.safe_load contents
+    
+    options = {
+      path: path,
+      gemset: data.dig( 'options', 'gemset'),
+      gem_name: data.dig( 'options', 'gem_name'),
+      env: ( data.dig( 'options', 'env') || {} ),
+    }
+    
+    new \
+      bin,
+      RbenvLock.rbenv_version_for( data.fetch( 'ruby_version' ) ),
+      data.fetch( 'target' ),
+      path: path,
+      gemset: data.dig( 'options', 'gemset'),
+      gem_name: data.dig( 'options', 'gem_name'),
+      env: ( data.dig( 'options', 'env') || {} ),
+      direct: data.dig( 'options', 'direct' )
   end
 
   
@@ -172,22 +205,23 @@ class RbenvLock::Lock
   # Attributes
   # ======================================================================
   
-  attr_reader :bin, :ruby_version, :gemset, :gem_name, :gem_version
+  attr_reader :bin, :ruby_version, :target, :gemset, :gem_name, :gem_version
   
   
   # Constructor
   # ======================================================================
   
   # Instantiate a new `RbenvLock::Lock`.
-  def initialize bin, ruby_version, options = {}
+  def initialize bin, ruby_version, target, options = {}
     @bin = bin
     @ruby_version = ruby_version
+    @target = target
     @gemset = options[:gemset]
     @gem_name = options[:gem_name]
     @gem_version = options[:gem_version]
     @path = options[:path]
     @env = options[:env] || {}
-    @direct = false
+    @direct = !!options[:direct]
   end # #initialize
   
   
@@ -268,7 +302,7 @@ class RbenvLock::Lock
           # The lock bin will def be in the gemset
           direct_gemset_bin
           
-        elsif ['gem', 'ruby'].include?( bin ) &&
+        elsif ['gem', 'ruby'].include?( bin )
           # These should always be in Ruby version (they come with it)
           direct_version_bin
           
@@ -290,8 +324,8 @@ class RbenvLock::Lock
   end
   
   
-  def target
-    @target ||= which self.bin
+  def target_path
+    @target_path ||= which target
   end
   
   
@@ -319,9 +353,20 @@ class RbenvLock::Lock
   #   The ENV vars the lock needs to work.
   # 
   def env
-    lock_env = {
+    # We used to start with an empty environment, but there's too much shit in 
+    # there that programs want or need, do going to 
+    lock_env = ENV.
+      to_h.
+      reject { |name, value|
+        %w(RBENV_, GEM_ BUNDLE_).any? { |prefix|
+          name.start_with? prefix
+        }
+      }.
+      to_h
+  
+    lock_env.merge!(
       'RBENV_VERSION' => ruby_version,
-    }
+    )
     
     # `direct` sets things up to call *directly to the real bin, bypassing
     # `rbenv` entirely*. This might have serious speed advantages, but also
@@ -346,11 +391,11 @@ class RbenvLock::Lock
       
       # See notes above
       if direct?
-        lock_env.merge!({
+        lock_env.merge!(
           'GEM_HOME'  => gemset_root,
           'GEM_PATH'  => "#{ gemset_root }:#{ gemdir }",
           'PATH'      => "#{ gemset_bin_dir }:#{ lock_env['PATH'] }",
-        })
+        )
       end
     end
     
@@ -363,8 +408,11 @@ class RbenvLock::Lock
     # Add any extra env vars
     lock_env.merge! @env
     
+    # Remove any `nil` values
+    lock_env.reject! { |name, value| value.nil? }
+    
     lock_env
-  end
+  end # #env
   
   
   # @return [nil]
@@ -445,6 +493,11 @@ class RbenvLock::Lock
   end
   
   
+  def exec_target *args
+    exec target_path, *args
+  end
+  
+  
   def ensure_gemset
     if gemset?
       FileUtils.mkdir_p( gemset_root ) unless File.directory?( gemset_root )
@@ -497,7 +550,7 @@ class RbenvLock::Lock
         file.puts "export #{ name }='#{ value }'"
       }
       file.puts
-      file.puts %{exec #{ target.quote } "$@"}
+      file.puts %{exec #{ target_path.quote } "$@"}
     end
     
     FileUtils.chmod 0755, path
@@ -595,4 +648,10 @@ class RbenvLock::Lock
   # end protected
   
   
-end # class RbenvLock::Lock
+end # class Lock
+
+
+# /Namespace
+# ========================================================================
+
+end # module RbenvLock

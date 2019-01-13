@@ -1,0 +1,29 @@
+#!/usr/bin/ruby
+# ^ IMPORTANT!  Directly use the *system* Ruby so we don't end up looping back
+#               into `rbenv`, which I'm sure would cause monstrous problems,
+#               rivaled only by the conundrum of writing correct fast bash
+#               scripts ;)
+# 
+##############################################################################
+# 
+# rbenv Lock Plugin Runner Script
+# ============================================================================
+# 
+# This is a tiny wrapper that the new YAML-format lock executables will point
+# to in their "she-bang" lines, like:
+# 
+#     #!/usr/bin/env /Users/nrser/.rbenv/plugins/rbenv-lock/bin/rbenv-lock-run
+# 
+##############################################################################
+
+require_relative '../lib/ruby/rbenv_lock'
+
+path = ARGV[ 0 ]
+args = ARGV[ 1..-1 ]
+lock = RbenvLock::Lock.read path
+
+RbenvLock.debug "Running YAML lock with #{ lock.target_path }...",
+  args: args,
+  lock: lock
+
+lock.exec_target *args
