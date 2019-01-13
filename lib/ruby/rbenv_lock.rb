@@ -184,14 +184,6 @@ module RbenvLock
   end
   
   
-  # Sub-Commands
-  # ----------------------------------------------------------------------------
-  
-  def self.help_cmd
-    puts "HELP!"
-  end
-  
-  
   def self.run cmd, *argv
     debug "Starting run...", cmd: cmd, argv: argv
     
