@@ -46,7 +46,7 @@ class Lock
   # 
   # @example
   #   # When...
-  #   RbenvLock::Env.locks_dir
+  #   RbenvLock.locks_dir
   #   # => "/Users/nrser/.rbenv/locks"
   #   
   #   # Then
@@ -60,7 +60,7 @@ class Lock
   #   Absolute path to lock bin file.
   # 
   def self.path_for bin
-    File.join RbenvLock::Env.locks_dir, bin
+    File.join RbenvLock.locks_dir, bin
   end
   
   
@@ -163,7 +163,7 @@ class Lock
     
     new \
       bin,
-      RbenvLock.rbenv_version_for( data.fetch( 'ruby_version' ) ),
+      RbenvLock.ruby_version_for( data.fetch( 'ruby_version' ) ),
       data.fetch( 'target' ),
       path: path,
       gemset: data.dig( 'options', 'gemset'),
@@ -179,7 +179,7 @@ class Lock
   #   {Lock} instances for each bin shim found.
   # 
   def self.list
-    locks_dir = RbenvLock::Env.locks_dir
+    locks_dir = RbenvLock.locks_dir
     
     return [] unless File.directory?( locks_dir )
     
@@ -260,7 +260,7 @@ class Lock
     return nil unless gemset?
     
     @gemset_root ||= File.join \
-      RbenvLock.rbenv_prefix( ruby_version ),
+      RbenvLock.rbenv.prefix( ruby_version ),
       'gemsets',
       gemset
   end
@@ -273,7 +273,7 @@ class Lock
   
   def version_bin_dir
     cache :@version_bin_dir do
-      File.join RbenvLock.rbenv_prefix( ruby_version ), 'bin'
+      File.join RbenvLock.rbenv.prefix( ruby_version ), 'bin'
     end
   end
   
@@ -319,7 +319,7 @@ class Lock
       end
     else
       # No direct, go to the shim
-      RbenvLock.shim_for bin
+      RbenvLock.rbenv.shim_path bin
     end
   end
   
@@ -343,7 +343,7 @@ class Lock
   # 
   def clean_PATH
     ENV['PATH'].split( ':' ).reject { |path|
-      path.include?( File.join( RbenvLock.rbenv_root, 'versions' ) ) ||
+      path.include?( File.join( RbenvLock.rbenv.root, 'versions' ) ) ||
         File.fnmatch?( '/**/rbenv/**/libexec', path )
     }.join ':'
   end
@@ -541,8 +541,8 @@ class Lock
       ensure_gem if gem?
     end
     
-    unless File.directory? RbenvLock::Env.locks_dir
-      FileUtils.mkdir_p( RbenvLock::Env.locks_dir )
+    unless File.directory? RbenvLock.locks_dir
+      FileUtils.mkdir_p( RbenvLock.locks_dir )
     end
     
     File.open path, 'w' do |file|

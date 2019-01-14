@@ -25,12 +25,10 @@ class RbenvLock::Cmd::Help < RbenvLock::Cmd::Base
   
   
   def general
-    locks_dir = RbenvLock::Env.locks_dir
-    
     err <<-END
 Mange "locks" - small executable scripts (like shims) placed in
 
-    #{ locks_dir }/<BIN>
+    #{ RbenvLock.locks_dir }/<BIN>
 
 that *always* run BIN using a specific Ruby version, with optional gemset[1]
 for full isolation.

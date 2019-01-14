@@ -15,10 +15,4 @@ module RbenvLock::Env
     ENV[ var_name( key ) ] = value.to_s
   end
   
-  def self.locks_dir
-    File.expand_path(
-      self[:locks_dir] ||
-      File.join( RbenvLock.rbenv_root, 'locks' )
-    )
-  end
 end # module RbenvLock::Env

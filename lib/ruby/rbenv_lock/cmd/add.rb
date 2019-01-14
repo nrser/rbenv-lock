@@ -98,7 +98,7 @@ class RbenvLock::Cmd::Add < RbenvLock::Cmd::Base
       fatal "Too many arguments", help: parser.to_s
     end
     
-    version = RbenvLock.rbenv_version_for args[0]
+    version = RbenvLock.ruby_version_for args[0]
     bin = args[1]
     
     # Use the bin name for the gemset if one wasn't provided

@@ -22,8 +22,8 @@ module RbenvLock::Output
     base.extend ClassMethods
     
     ClassMethods.instance_methods.each do |name|
-      base.send :define_method, name do |*args|
-        self.class.public_send name, *args
+      base.send :define_method, name do |*args, &block|
+        self.class.public_send name, *args, &block
       end
     end
   end
@@ -119,6 +119,22 @@ module RbenvLock::Output
       end
       
       exit options[:exit]
+    end
+    
+    
+    def measure get_args, &body
+      return body.call unless debug?
+      
+      args = get_args.call
+      args = [ args ] unless args.is_a?( Array )
+      
+      start = Time.now
+      response = body.call
+      delta = Time.now - start
+      
+      err "DELTA #{ ( delta * 1_000 ).ceil }ms", *args
+      
+      response
     end
   end
   
