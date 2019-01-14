@@ -1,9 +1,8 @@
-require "./rbenv_lock"
-require "./rbenv_lock/lock"
+require "./rbenv/**"
 
 path = ARGV[ 0 ]
 args = ARGV[ 1..-1 ]
 
-lock = RbenvLock::Lock.load path
+lock = Rbenv::Lock::Lock.load path
 
 lock.exec_target args

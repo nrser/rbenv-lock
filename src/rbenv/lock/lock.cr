@@ -1,8 +1,18 @@
+# Requirements
+# =======================================================================
+
 require "yaml"
 
-require "./core_ext/file"
 
-module RbenvLock
+# Namespace
+# =======================================================================
+
+module Rbenv
+module Lock
+
+
+# Definitions
+# =======================================================================
 
 class Lock
   
@@ -30,7 +40,7 @@ class Lock
   
   
   def self.path_for( name )
-    File.join RbenvLock::Env.locks_dir, name
+    File.join Rbenv::Lock::Env.locks_dir, name
   end
   
   
@@ -70,7 +80,7 @@ class Lock
   
   def version_bin_dir
     @version_bin_dir ||= \
-      File.join RbenvLock.rbenv.prefix( ruby_version ), "bin"
+      File.join Rbenv::Lock.rbenv.prefix( ruby_version ), "bin"
   end
   
   
@@ -81,7 +91,7 @@ class Lock
   
   def gemset_root : String?
     File.join? \
-      RbenvLock.rbenv.prefix( ruby_version ),
+      Rbenv::Lock.rbenv.prefix( ruby_version ),
       "gemsets",
       gemset
   end
@@ -126,7 +136,7 @@ class Lock
       end
     else
       # No direct, go to the shim
-      RbenvLock.rbenv.shim_path bin
+      Rbenv::Lock.rbenv.shim_path bin
     end
   end
   
@@ -160,6 +170,11 @@ class Lock
     exec_target args
   end
   
-end
+end # class Lock
 
-end # module RbenvLock
+
+# /Namespace
+# =======================================================================
+
+end # module Lock
+end # module Rbenv

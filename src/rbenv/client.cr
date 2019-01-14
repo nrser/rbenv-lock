@@ -1,29 +1,15 @@
-# Requirements
-# =======================================================================
-
-# Stdlib
-# -----------------------------------------------------------------------
-
-# Deps
-# -----------------------------------------------------------------------
-
-# Project / Package
-# -----------------------------------------------------------------------
-
-# require "./output"
-
-
 # Namespace
 # =======================================================================
 
-module  RbenvLock
+module  Rbenv
 
 
 # Definitions
 # =======================================================================
 
-# @todo document Rbenv class.
-class Rbenv
+# A little client class for interacting with the `rbenv` CLI.
+# 
+class Client
 
   # include Output
   
@@ -103,10 +89,10 @@ class Rbenv
     File.join shim_dir, bin
   end
   
-end # class Rbenv
+end # class Client
 
 
 # /Namespace
 # =======================================================================
 
-end # module RbenvLock
+end # module Rbenv
