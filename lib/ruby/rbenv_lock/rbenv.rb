@@ -114,7 +114,7 @@ class Rbenv
   
   
   def shims_dir
-    @shim_dir ||= File.join rbenv.root, 'shims'
+    @shims_dir ||= File.join root, 'shims'
   end
   
   
