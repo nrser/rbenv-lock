@@ -485,7 +485,9 @@ class Lock
     env, args, opts = prep_for_spawn args
     
     debug "exec'ing...",
-      env: env,
+      # TODO  This should just dump the changes? Whole ENV is too much most
+      #       the time.
+      # env: env,
       args: args,
       opts: opts
     
