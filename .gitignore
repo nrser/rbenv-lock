@@ -53,3 +53,6 @@ Temporary Items
 /bin/rbenv-lock-exec-file
 /bin/rbenv-lock-exec-file-debug
 /bin/*.dwarf
+
+# Generated docs
+/docs/
