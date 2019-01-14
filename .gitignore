@@ -7,7 +7,8 @@
 .LSOverride
 
 # Icon must end with two 
-Icon
+Icon
+
 
 # Thumbnails
 ._*
@@ -30,6 +31,7 @@ Temporary Items
 #
 # END Global/macOS.gitingore
 ##############################################################################
+
 ##############################################################################
 # BEGIN QB.gitingore
 #
@@ -41,4 +43,13 @@ Temporary Items
 #
 # END QB.gitingore
 ##############################################################################
+
+# Project
+# ============================================================================
+
 /tmp
+
+# Ignore Crystal builds
+/bin/rbenv-lock-run-cr
+/bin/rbenv-lock-run-cr-debug
+/bin/*.dwarf
