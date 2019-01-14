@@ -1,4 +1,19 @@
 # I suck at make file... :/
+# 
+# Refs...
+# 
+# [1]: https://www.gnu.org/prep/standards/html_node/Makefile-Basics.html#Makefile-Basics
+# 
+# [.PHONY]: https://stackoverflow.com/a/2145605
+# 
+
+# > Every Makefile should contain this line: [1][]
+SHELL = /bin/sh
+
+# > it is a good idea to set the suffix list explicitly using only the suffixes
+# > you need in the particular Makefile [1][]
+.SUFFIXES:
+.SUFFIXES: .cr
 
 CRYSTAL=crystal
 SRC=./src
@@ -7,6 +22,20 @@ OUT=./bin
 # All the Crystal files. We depend on all of these for compilation so that 
 # it triggers when any change.
 SOURCES := $(shell find $(SRC) -name '*.cr')
+
+# What's we gotta make
+DEBUG_TARGETS := $(OUT)/rbenv-lock-exec-file-debug
+RELEASE_TARGETS := $(OUT)/rbenv-lock-exec-file
+
+
+# Build 'em all!
+# 
+# Want this to the the default task, which can be acomplished by simply 
+# putting it first (among other ways... <https://stackoverflow.com/a/30176470>)
+# 
+.PHONY: all # [.PHONY][] means `all` is not a file, but just a task (I think...)
+all: debug release
+	@echo Everything... MAKED!
 
 
 # Turn a Crystal file `//src/<NAME>.cr`
@@ -28,27 +57,33 @@ $(OUT)/%: $(SRC)/%.cr $(SOURCES)
 
 
 # Build the debug executables
-debug: $(OUT)/rbenv-lock-run-cr-debug
+.PHONY: debug
+debug: $(DEBUG_TARGETS)
+	@echo Debug executables... BUILT!
+	@echo
 
 
 # Build the release executables
-release: $(OUT)/rbenv-lock-run-cr
-
-
-# Build 'em both
-all: debug release
+.PHONY: release
+release: $(RELEASE_TARGETS)
+	@echo Release executables... BUILT!
+	@echo
 
 
 # Do a poor job cleaning
 .PHONY: clean
-clean:
-	@echo Cleaning...
+clean:	
+	rm -f $(RELEASE_TARGETS)
+	rm -f $(DEBUG_TARGETS)
+	rm -f $(OUT)/*.dwarf
 	
-	@rm -f $(OUT)/rbenv-lock-run-cr
-	@rm -f $(OUT)/rbenv-lock-run-cr-debug
-	@rm -f $(OUT)/*.dwarf
-	
-	@echo Done cleaning.
+	@echo Output directory... CLEANED!
+	@echo
+
+
+# Re-make everything by cleaning then making everything
+.PHONY: remake
+remake: clean all
 
 
 # Me trying figure out make

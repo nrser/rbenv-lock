@@ -14,7 +14,16 @@ module Lock
 # Definitions
 # =======================================================================
 
-class Lock
+# Runtime representation of a lock executable.
+#
+# Lock executables are files in the locks directores that act like
+# reverse-shims: instead of one executable dynamically pointing to the
+# approriate executable (which may or may not exist) for whatever Ruby version
+# is enabled, locks always execute the target in a specific version of Ruby,
+# regardless of what Ruby version is active.
+# 
+# Lock files are 
+class Exe
   
   def self.load( path )
     contents = File.read path
@@ -40,7 +49,7 @@ class Lock
   
   
   def self.path_for( name )
-    File.join Rbenv::Lock::Env.locks_dir, name
+    File.join Env.locks_dir, name
   end
   
   
@@ -106,7 +115,7 @@ class Lock
   
   def version_bin_dir
     @version_bin_dir ||= \
-      File.join Rbenv::Lock.rbenv.prefix( ruby_version ), "bin"
+      File.join Lock.rbenv.prefix( ruby_version ), "bin"
   end
   
   
@@ -117,7 +126,7 @@ class Lock
   
   def gemset_root : String?
     File.join? \
-      Rbenv::Lock.rbenv.prefix( ruby_version ),
+      Lock.rbenv.prefix( ruby_version ),
       "gemsets",
       gemset
   end
@@ -162,7 +171,7 @@ class Lock
       end
     else
       # No direct, go to the shim
-      Rbenv::Lock.rbenv.shim_path bin
+      Lock.rbenv.shim_path bin
     end
   end
   
@@ -196,7 +205,7 @@ class Lock
     exec_target args
   end
   
-end # class Lock
+end # class Exe
 
 
 # /Namespace
