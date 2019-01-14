@@ -44,6 +44,23 @@ class Lock
   end
   
   
+  # Instance Variables
+  # ==========================================================================
+  
+  @name : String
+  @target_path : String?
+  @ruby_version : String
+  @target : String
+  @gemset : String?
+  @gem_name : String?
+  @path : String?
+  @direct : Bool
+  @env : Process::Env
+  
+  
+  # Properties
+  # ==========================================================================
+  
   getter name : String
   getter ruby_version : String
   getter target : String
@@ -51,18 +68,27 @@ class Lock
   getter gem_name : String?
   
   
-  def initialize( @name : String,
-                  @ruby_version : String,
-                  @target : String,
-                  @gemset : String? = nil,
-                  @gem_name : String? = nil,
-                  @path : String? = nil,
-                  @direct : Bool = false,
-                  @env : Process::Env = {} of String => String? )
-    @target_path = uninitialized String?
+  # Construction
+  # ==========================================================================
+  
+  def initialize( @name,
+                  @ruby_version,
+                  @target,
+                  @gemset = nil,
+                  @gem_name = nil,
+                  @path = nil,
+                  @direct = false,
+                  @env = {} of String => String? )
+    
+    # `@target_path` may require shell-outs, so leave it `nil` until needed
+    # ({#target_path} resolves it dynamically)
     @target_path = nil
+    
   end
   
+  
+  # Instance Methods
+  # ==========================================================================
   
   def path : String
     @path ||= self.class.path_for name
