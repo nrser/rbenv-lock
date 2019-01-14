@@ -1,36 +1,57 @@
-# I suck at makefile... :/
+# I suck at make file... :/
 
 CRYSTAL=crystal
 SRC=./src
 OUT=./bin
 
-SOURCES := $(wildcard $(SRC_DIR)/*.cr)
-TARGETS := $(SRC_DIR)/rbenv-lock-run-cr.cr
+# All the Crystal files. We depend on all of these for compilation so that 
+# it triggers when any change.
+SOURCES := $(shell find $(SRC) -name '*.cr')
 
 
-$(OUT)/rbenv-lock-run-cr-debug: $(SOURCES)
+# Turn a Crystal file `//src/<NAME>.cr`
+# to an debug executable `//bin/<NAME>-debug`
+$(OUT)/%-debug: $(SRC)/%.cr $(SOURCES)
 	$(CRYSTAL) build \
-		-o $(OUT)/rbenv-lock-run-cr-debug \
-		$(SRC)/rbenv-lock-run-cr.cr
+		-o $@ \
+		$<
 
-$(OUT)/rbenv-lock-run-cr: $(SOURCES)
+
+# Turn a Crystal file `//src/<NAME>.cr`
+# to an optimized executable `//bin/<NAME>`
+$(OUT)/%: $(SRC)/%.cr $(SOURCES)
 	$(CRYSTAL) build \
 		--release \
 		--no-debug \
-		-o $(OUT)/rbenv-lock-run-cr \
-		$(SRC)/rbenv-lock-run-cr.cr
+		-o $@ \
+		$<
 
+
+# Build the debug executables
 debug: $(OUT)/rbenv-lock-run-cr-debug
 
+
+# Build the release executables
 release: $(OUT)/rbenv-lock-run-cr
 
+
+# Build 'em both
 all: debug release
 
+
+# Do a poor job cleaning
 .PHONY: clean
 clean:
 	@echo Cleaning...
 	
 	@rm -f $(OUT)/rbenv-lock-run-cr
 	@rm -f $(OUT)/rbenv-lock-run-cr-debug
-	@rm -f $(OUT)/rbenv-lock-run-cr-debug.dwarf
+	@rm -f $(OUT)/*.dwarf
+	
 	@echo Done cleaning.
+
+
+# Me trying figure out make
+.PHONY: blah
+blah:
+	@echo "SOURCES: $(SOURCES)"
