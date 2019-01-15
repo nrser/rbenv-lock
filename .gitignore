@@ -54,5 +54,6 @@ Temporary Items
 /bin/rbenv-lock-exec-file-debug
 /bin/*.dwarf
 
-# Generated docs
-/docs/
+# Generated docs. I use `//site/` for the generation target 'cause I like to
+# have hand-written docs in `//docs/`
+/site/

@@ -18,7 +18,7 @@ SHELL = /bin/sh
 CRYSTAL=crystal
 SRC=./src
 OUT=./bin
-DOCS=./docs
+DOC_OUT=./site
 
 # All the Crystal files. We depend on all of these for compilation so that 
 # it triggers when any change.
@@ -87,21 +87,21 @@ remake: clean all
 
 
 clean-docs:
-	rm -rf $(DOCS)/
+	rm -rf $(DOC_OUT)/
 	
 	@echo Docs... CLEANED!
 	@echo 
 
 
-$(DOCS)/*: $(SOURCES)
-	rm -rf $(DOCS)/*
-	$(CRYSTAL) doc
+$(DOC_OUT)/*: $(SOURCES)
+	rm -rf $(DOC_OUT)/*
+	$(CRYSTAL) doc -o "$(DOC_OUT)"
 	
 	@echo Docs... GENERATED!
 	@echo
 
 
-docs: $(DOCS)/*
+docs: $(DOC_OUT)/*
 
 
 serve-docs: docs
