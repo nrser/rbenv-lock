@@ -1,0 +1,96 @@
+# Relevant ENV values when executing
+# 
+#   ~ $ ruby ./tmp/here.rb
+# 
+# (`pwd = ~ = $HOME`), which triggers the weird section in the shim:
+# 
+#     #!/usr/bin/env bash
+#     set -e
+#     [ -n "$RBENV_DEBUG" ] && set -x
+#     
+#     # Get the basename (bin/exe name) of the executing
+#     program="${0##*/}"
+#     # Interested in all this mess...
+#     if [ "$program" = "ruby" ]; then
+#       for arg; do
+#         case "$arg" in
+#         # If we hit `-e` or `--` then bail out, we're done here 
+#         -e* | -- ) break ;;
+#         # If we hit an arg that:
+#         # 
+#         # 1. Has a `/` in it
+#         # 2. and is an existing regular file
+#         # 
+#         # then export `RBENV_DIR` to be the *directory* of that file 
+#         # (by chomping off everything after last `/`)
+#         # 
+#         */* )
+#           if [ -f "$arg" ]; then
+#             export RBENV_DIR="${arg%/*}"
+#             break
+#           fi
+#           ;;
+#         esac
+#       done
+#     fi
+#     
+#     export RBENV_ROOT="/Users/nrser/.rbenv"
+#     exec "/usr/local/Cellar/rbenv/1.1.1/libexec/rbenv" exec "$program" "$@"
+# 
+# This exported `RBENV_DIR=./tmp` in response to arg `./tmp/here.rb` in the 
+# case branch in question.
+# 
+
+OLDPWD: /Users/nrser/tmp
+
+PATH:
+  - /Users/nrser/.rbenv/versions/2.3.7/bin
+  - /usr/local/Cellar/rbenv/1.1.1/libexec
+  - /Users/nrser/.rbenv/plugins/rbenv-lock/bin
+  - /Users/nrser/.rbenv/plugins/rbenv-gemset/bin
+  - ./dev/bin:./bin
+  - ./dev/node_modules/.bin
+  - ./node_modules/.bin
+  - /Users/nrser/bin
+  - /Users/nrser/src/gh/nrser/nrser.env/support/git/bin
+  - /Users/nrser/src/gh/nrser/nrser.env/bin
+  - /Users/nrser/.rbenv/locks
+  - /Users/nrser/.rbenv/shims
+  - /Users/nrser/src/gh/nrser/nrser.env/support/rash/bin
+  - /usr/local/Cellar/pyenv-virtualenv/1.1.3/shims
+  - /Users/nrser/.pyenv/shims
+  - /Users/nrser/.nodenv/shims
+  - /Users/nrser/.nodenv/bin
+  - /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/bin
+  - /usr/local/bin
+  - /usr/bin
+  - /bin
+  - /usr/sbin
+  - /sbin
+  - /Library/TeX/texbin
+
+PWD: /Users/nrser
+
+RBENV_DIR: /Users/nrser/tmp
+
+RBENV_GEMSET_DISABLE_SHARED_GEMS: '1'
+
+RBENV_HOOK_PATH:
+  - /Users/nrser/.rbenv/rbenv.d
+  - /usr/local/Cellar/rbenv/1.1.1/rbenv.d
+  - /usr/local/etc/rbenv.d
+  - /etc/rbenv.d
+  - /usr/lib/rbenv/hooks
+  - /Users/nrser/.rbenv/plugins/rbenv-gemset/etc/rbenv.d
+  
+RBENV_ROOT: /Users/nrser/.rbenv
+
+RBENV_SHELL: bash
+
+RBENV_VERSION: '2.3.7'
+
+RUBYLIB:
+  - /usr/local/Cellar/rbenv/1.1.1/rbenv.d/exec/gem-rehash
+  - ''
+
+RUBY_CONFIGURE_OPTS: --with-readline-dir="/usr/local/opt/readline"
