@@ -22,6 +22,7 @@
 #
 ##############################################################################
 
+require "./nrser/log"
 require "./rbenv/**"
 
 # The path to the lock YAML file
