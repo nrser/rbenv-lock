@@ -143,8 +143,6 @@ module RbenvLock
   
   
   def self.run cmd, *argv
-    puts ENV[ 'PATH' ].split( ':' )
-    
     debug "Starting run...", cmd: cmd, argv: argv
     
     RbenvLock::Cmd.all.each do |cmd_class|
