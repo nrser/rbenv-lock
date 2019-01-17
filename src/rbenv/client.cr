@@ -39,6 +39,7 @@ class Client
   
   def initialize
     @prefixes = {} of String => String
+    @gem_dirs = {} of String => String
   end
   
   
@@ -87,6 +88,18 @@ class Client
   
   def shim_path( bin : String ) : String
     File.join shim_dir, bin
+  end
+  
+  
+  def libexec_path
+    @libexec_path ||= File.dirname File.real_path( `which rbenv`.chomp )
+  end
+  
+  
+  # Direct path to `gem` executable for a *version*.
+  # 
+  def gem_exe_path( version : String ) : String
+    File.join( prefix( version ), "bin", "gem" )
   end
   
 end # class Client

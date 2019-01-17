@@ -1,0 +1,73 @@
+# $ rbenv lock exec qb ruby ./extract.rb
+---
+GEM_HOME: "/Users/nrser/.rbenv/versions/2.3.7/gemsets/qb"
+
+GEM_PATH:
+- "/Users/nrser/.rbenv/versions/2.3.7/gemsets/qb"
+
+PATH:
+# rbenv additions... 
+- "/Users/nrser/.rbenv/versions/2.3.7/bin"
+- "/Users/nrser/.rbenv/versions/2.3.7/gemsets/qb/bin"
+- "/usr/local/Cellar/rbenv/1.1.1/libexec"
+- "/Users/nrser/.rbenv/plugins/rbenv-lock/bin"
+- "/Users/nrser/.rbenv/plugins/rbenv-gemset/bin"
+- "/Users/nrser/.rbenv/versions/2.3.7/gemsets/qb/bin"
+- "/Users/nrser/.rbenv/versions/2.3.7/bin"
+- "/Users/nrser/.rbenv/plugins/rbenv-lock/bin"
+- "/Users/nrser/.rbenv/plugins/rbenv-gemset/bin"
+
+- "./dev/bin"
+- "./bin"
+- "./dev/node_modules/.bin"
+- "./node_modules/.bin"
+- "/Users/nrser/bin"
+- "/Users/nrser/src/gh/nrser/nrser.env/support/git/bin"
+- "/Users/nrser/src/gh/nrser/nrser.env/bin"
+- "/Users/nrser/.rbenv/locks"
+- "/Users/nrser/.rbenv/shims"
+- "/Users/nrser/src/gh/nrser/nrser.env/support/rash/bin"
+- "/usr/local/Cellar/pyenv-virtualenv/1.1.3/shims"
+- "/Users/nrser/.pyenv/shims"
+- "/Users/nrser/.nodenv/shims"
+- "/Users/nrser/.nodenv/bin"
+- "/usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/bin"
+- "/usr/local/bin"
+- "/usr/bin"
+- "/bin"
+- "/usr/sbin"
+- "/sbin"
+- "/Library/TeX/texbin"
+
+RBENV_DIR: "/Users/nrser/.rbenv/plugins/rbenv-lock/dev/scratch/envs"
+
+RBENV_GEMSETS: qb
+
+RBENV_GEMSET_DISABLE_SHARED_GEMS: '1'
+
+RBENV_HOOK_PATH:
+- "/Users/nrser/.rbenv/rbenv.d"
+- "/usr/local/Cellar/rbenv/1.1.1/rbenv.d"
+- "/usr/local/etc/rbenv.d"
+- "/etc/rbenv.d"
+- "/usr/lib/rbenv/hooks"
+- "/Users/nrser/.rbenv/plugins/rbenv-gemset/etc/rbenv.d"
+- "/Users/nrser/.rbenv/rbenv.d"
+- "/usr/local/Cellar/rbenv/1.1.1/rbenv.d"
+- "/usr/local/etc/rbenv.d"
+- "/etc/rbenv.d"
+- "/usr/lib/rbenv/hooks"
+- "/Users/nrser/.rbenv/plugins/rbenv-gemset/etc/rbenv.d"
+
+RBENV_LOCK_GEM: qb
+
+RBENV_ROOT: "/Users/nrser/.rbenv"
+
+RBENV_SHELL: bash
+
+RBENV_VERSION: 2.3.7
+
+RUBYLIB:
+- "/usr/local/Cellar/rbenv/1.1.1/rbenv.d/exec/gem-rehash"
+- "/usr/local/Cellar/rbenv/1.1.1/rbenv.d/exec/gem-rehash"
+- ''

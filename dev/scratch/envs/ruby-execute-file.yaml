@@ -48,7 +48,8 @@ PATH:
   - /usr/local/Cellar/rbenv/1.1.1/libexec
   - /Users/nrser/.rbenv/plugins/rbenv-lock/bin
   - /Users/nrser/.rbenv/plugins/rbenv-gemset/bin
-  - ./dev/bin:./bin
+  - ./dev/bin
+  - ./bin
   - ./dev/node_modules/.bin
   - ./node_modules/.bin
   - /Users/nrser/bin
