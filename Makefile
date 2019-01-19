@@ -25,8 +25,8 @@ DOC_OUT=./site
 SOURCES := $(shell find $(SRC) -name '*.cr')
 
 # What's we gotta make
-DEBUG_TARGETS := $(OUT)/rbenv-lock-exec-file-debug
-RELEASE_TARGETS := $(OUT)/rbenv-lock-exec-file
+DEBUG_TARGETS := $(OUT)/rbenv-lock-exec-file-debug $(OUT)/rbenv-lock-debug
+RELEASE_TARGETS := $(OUT)/rbenv-lock-exec-file $(OUT)/rbenv-lock
 
 
 # [.PHONY][] means `all` is not a file, but just a task (I think...)

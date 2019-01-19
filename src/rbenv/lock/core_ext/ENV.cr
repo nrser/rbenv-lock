@@ -3,4 +3,8 @@ module ENV
     value = self[ name ]?
     value.nil? || value == ""
   end
+  
+  def self.present?( name : String ) : Bool
+    !missing?( name )
+  end
 end

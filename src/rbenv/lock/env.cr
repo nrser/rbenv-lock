@@ -19,6 +19,10 @@ module Env
     ENV[ var_name( key ) ]
   end
   
+  def self.[]?( key )
+    ENV[ var_name( key ) ]?
+  end
+  
   def self.[]=( key, value )
     ENV[ var_name( key ) ] = value.to_s
   end

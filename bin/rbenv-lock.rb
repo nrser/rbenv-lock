@@ -1,0 +1,49 @@
+#!/usr/bin/ruby
+# ^ IMPORTANT!  Directly use the *system* Ruby so we don't end up looping back
+#               into `rbenv`, which I'm sure would cause monstrous problems,
+#               rivaled only by the conundrum of writing correct fast bash
+#               scripts ;)
+# 
+##############################################################################
+# 
+# rbenv Lock Plugin - Secure the gems that provide your important executables
+# 
+# @example Working now - isolate single executable gem in own gemset
+#   # `qb` bin from gem and in gemset of same name locked to Ruby 2.3.6
+#   rbenv lock create 2.3.6 qb --gemset --gem=qb
+# 
+#   # The gemset name is inferred from the gem name
+# 
+# @example TODO - infer gem *and* gemset name from bin name
+#   rbenv lock create 2.3.6 qb --gem --gemset
+# 
+# @example TODO - lock *all* the bins from a gem (usually just one anyways)
+#   rbenv lock create 2.3.6 --gem=qb [--gemset]
+# 
+# @example MAYBE - infer version if only installed in one
+#   rbenv lock create --gem=qb [--gemset]
+#   
+#   # So if `qb` gem is only installed in one Ruby, lock to that. Could work
+#   # for bin name as well.
+# 
+# @example TODO - remove by bin name
+#   rbenv lock remove qb
+#   rbenv lock rm qb
+# 
+# @example TODO - remove *all* the bins locked for a gem (undo of above)
+#   rbenv lock remove --gem=qb
+# 
+# 
+# @example TODO - exec in the lock's environment
+#   rbenv lock exec qb -- gem env
+#   
+#   # Really useful for seeing what's going on in there, basically already
+#   # have the code in {RbenvLock::Lock}
+# 
+# @example ...?
+# 
+##############################################################################
+
+require_relative '../lib/ruby/rbenv_lock'
+
+RbenvLock.run *ARGV.to_a

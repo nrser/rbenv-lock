@@ -65,7 +65,7 @@ class Exe
   # {.default_locks_dir}. Exapnds either of them to form the response.
   #
   def self.dir : String
-    File.expand_path( Env[ :locks_dir ] || default_locks_dir )
+    File.expand_path( Env[ :locks_dir ]? || default_dir )
   end
   
   
@@ -73,7 +73,7 @@ class Exe
   # current {.dir}).
   # 
   def self.path_for( name ) : String
-    File.join self.class.dir, name
+    File.join dir, name
   end
   
   
@@ -115,15 +115,15 @@ class Exe
       return locks
     end
     
-    Dir.foreach( dir ) do |filename|
-      path = File.join locks_dir, filename
+    Dir.each_child( dir ) do |filename|
+      path = File.join dir, filename
       
-      if !filename.start_with?( '.' ) && File.file?( path )
+      if File.file?( path )
         begin
-          locks << read( path )
+          locks << load( path )
         rescue error : Exception
-          # TODO warn "Failed to load lock bin file",
-          #   path: path
+          warn "Failed to load lock bin file",
+            path: path
         end
       end
     end
@@ -207,27 +207,41 @@ class Exe
   
   # Does this lock use a gemset (required `rbenv-gemset` plugin)?
   # 
+  # NOTE
+  #
+  # Not all that useful since the type system doesn't let you gaurd on this then
+  # work as if `#gemset` is not `nil`, presumably because of concurrency..?
+  # 
   def gemset?
     !@gemset.nil?
   end
   
   
   # Do we have a {#gem_name}?
-  #   
+  #
+  # NOTE
+  #
+  # Not all that useful since the type system doesn't let you gaurd on this then
+  # work as if `#gem_name` is not `nil`, presumably because of concurrency..?
+  #
   def gem?
-    !!@gem_name
+    !@gem_name.nil?
   end
   
   
-  def version_bin_dir
+  # Absolute path to the `bin` directory in the `Client#prefix` directory for
+  # this `Exe`'s `#ruby_version`.
+  # 
+  def version_bin_dir : String
     File.join( Lock.rbenv.prefix( ruby_version ), "bin" )
   end
   
   
-  def direct_version_bin_path_for( bin )
+  # Absolute path to a bin file in `#version_bin_dir`.
+  # 
+  def direct_version_bin_path_for( bin ) : String
     File.join version_bin_dir, bin
   end
-  
   
   
   # Absolute path to the gemset directory (if the `Exe` has a `#gemset`).

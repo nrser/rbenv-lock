@@ -42,7 +42,7 @@ module Log
   {% for name in Logger::Severity.constants %}
     
     macro {{ name.id.downcase }}( message )
-      
+          
       # If we're in a `--release` build, we totally omit `debug` messages by
       # having the `debug` macro expand to nothing!
       # 
@@ -56,6 +56,28 @@ module Log
           file_path: \{{ message.filename }},
           line_number: \{{ message.line_number }},
           message: \{{ message }}
+          
+      {% end %} # if
+      
+    end # macro
+  
+    
+    macro {{ name.id.downcase }}( message, **values )
+      
+      # If we're in a `--release` build, we totally omit `debug` messages by
+      # having the `debug` macro expand to nothing!
+      # 
+      {% if !flag?( :release ) || name.id != "DEBUG" %}
+      
+        # Ok, we're either not `--release`, or we're not `DEBUG`, so we want
+        # this macro to do something... which is grab the call site info and
+        # hand off to `#log`.
+        log \
+          severity: Logger::Severity::{{ name.id }},
+          file_path: \{{ message.filename }},
+          line_number: \{{ message.line_number }},
+          message: \{{ message }},
+          values: ( \{{ values }} ).to_h
           
       {% end %} # if
       
@@ -77,7 +99,8 @@ module Log
     def self.logger : Logger
       @@logger ||= Logger.new \
         io: STDERR,
-        formatter: NRSER::Log::DEFAULT_FORMATTER
+        formatter: NRSER::Log::DEFAULT_FORMATTER,
+        level: NRSER::Log.level
     end
     
     
@@ -85,30 +108,94 @@ module Log
     # 
     protected def self.log(
       severity : Logger::Severity,
-      message : String,
-      file_path : String?,
-      line_number : Int32?,
+      message : String?,
+      values : Hash? = nil,
+      file_path : String? = nil,
+      line_number : Int32? = nil,
     )
       {% if flag?( :release ) %}
         # Omit the class and src loc shit when in a release
-        logger.log severity, message
+        if values.nil? || values.empty?
+          logger.log severity, message
+        else
+          logger.log severity do
+            message + "\n" + NRSER::Log.format_values( values )
+          end
+        end
         
       {% else %}
       
-        logger.log severity: severity do
+        logger.log severity do
           # Block is only executed if we're over severity.
           
-          src_loc = "#{ file_path }:#{ line_number }"
-          
-          indented_message = message.lines.map { |line| "  #{ line }" }.join
-          
-          "{#{ self.name }} #{ src_loc }\n#{ indented_message }\n"
+          String.build( 256 ) do |io|
+            io << '{'
+            io << self.name
+            io << '}'
+            
+            if file_path
+              io << file_path
+              
+              if line_number
+                io << ':'
+                io << line_number
+              end
+            end
+            
+            io << '\n'
+            
+            if message
+              message.lines.each { |line| io << "  "; io << line }
+              io << '\n'
+            end
+            
+            unless values.nil? || values.empty?
+              NRSER::Log.format_values( values, io: io, indent: 4 )
+            end
+          end
         end
         
       {% end %}
     end # .log
   
   end # macro included
+  
+  
+  @@level : Logger::Severity = Logger::INFO
+  
+  
+  # Singleton Methods
+  # ==========================================================================
+  
+  def self.format_values( values : Hash, indent : String = "  " ) : String
+    values.
+      map { |name, value|
+        "#{ indent }#{ name }: " +
+        value.pretty_inspect.lines.join( "#{ indent }  " )
+      }.
+      join( "\n" ) + "\n"
+  end
+  
+  
+  def self.format_values( values : Hash, io : IO, indent = 2 ) : Nil
+    values.each do |name, value|
+      io << (" " * indent) << name << ": "
+      # io << name
+      # io << ": "
+      PrettyPrint.format( value, io, width: 79, indent: indent + 2 )
+      io << '\n'
+    end
+  end
+  
+  
+  def self.level : Logger::Severity
+    @@level
+  end
+  
+  
+  def self.level=( level : Logger::Severity )
+    @@level = level
+  end
   
   
   # Instance Methods
