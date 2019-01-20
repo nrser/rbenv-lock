@@ -54,6 +54,8 @@ Temporary Items
 /tmp
 
 # Ignore Crystal builds
+/bin/rbenv-lock
+/bin/rbenv-lock-debug
 /bin/rbenv-lock-exec-file
 /bin/rbenv-lock-exec-file-debug
 /bin/*.dwarf
