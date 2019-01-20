@@ -1,3 +1,5 @@
+require "shards/versions"
+
 # Namespace
 # =======================================================================
 
@@ -10,14 +12,8 @@ module  Rbenv
 # A little client class for interacting with the `rbenv` CLI.
 # 
 class Client
-
-  # include Output
   
-  # Constants
-  # ========================================================================
-  
-  
-  # Singleton Methods
+  # Class Methods
   # ========================================================================
   
   def self.quote( string : String ) : String
@@ -33,6 +29,10 @@ class Client
       join( " " )
   end
   
+  @current : String? = nil
+  @global : String? = nil
+  @versions : Array(String)? = nil
+  
   
   # Construction
   # ========================================================================
@@ -47,14 +47,14 @@ class Client
   # Instance Methods
   # ========================================================================
   
-  def run( cmd : Symbol ) : String
+  def run( cmd : String | Symbol ) : String
     shell_string =  "rbenv-#{ cmd } 2>/dev/null || rbenv #{ cmd }"
     
     `#{ shell_string }`
   end
   
   
-  def run( cmd : Symbol, *args : String ) : String
+  def run( cmd : String | Symbol, *args : String ) : String
     args_s = self.class.quote args
     
     shell_string = \
@@ -71,8 +71,42 @@ class Client
   end
   
   
+  def global : String
+    @global ||= run( :global ).chomp
+  end
+  
+  
+  def current : String
+    @current ||= run( :"version-name" ).chomp
+  end
+  
+  
+  # Bare names of Ruby versions installed via rbenv.
+  # 
+  # EXAMPLE
+  #   
+  #     RbenvLock::Rbenv.new.versions
+  #     #=> ["2.0.0-p353", "2.3.7", "2.4.4", "2.5.1"]
+  # 
   def versions : Array(String)
-    @versions ||= run( :versions, "--bare" ).lines.map( &:chomp )
+    @versions ||= run( :versions, "--bare" ).lines.map( &.chomp )
+  end
+  
+  
+  def version_for( requirements : Enumerable(String) ) : String
+    Shards::Versions.resolve( versions, requirements ).last
+  end
+  
+  
+  def version_for( requirement : String ) : String
+    case requirement
+    when "current"
+      current
+    when "global"
+      global
+    else
+      version_for requirements: { requirement }
+    end
   end
   
   

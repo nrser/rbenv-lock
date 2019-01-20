@@ -25,16 +25,6 @@ module Cmd
 
 # List locks.
 # 
-# @example 1.  Basic usage
-#       rbenv lock list
-#   
-#   Output looks like `<BIN>: <VERSION>`.
-# 
-# @example 2.  List details
-#       rbenv lock list --long
-#   
-#   Lock details are written in YAML format.
-# 
 class List < Base
   @@aliases = [ "ls" ]
   
@@ -71,7 +61,7 @@ class List < Base
   
   
   def on_run
-    debug "RUNNING `list` command...", argv: argv
+    debug "RUNNING `list` command...", args_in: args_in
     
     locks = Rbenv::Lock::Exe.list
     

@@ -119,7 +119,13 @@ module Log
           logger.log severity, message
         else
           logger.log severity do
-            message + "\n" + NRSER::Log.format_values( values )
+            String.build do |io|
+              if message
+                io << message << "\n"
+              end
+              
+              NRSER::Log.format_values( values, io: io, indent: 2 )
+            end
           end
         end
         

@@ -6,6 +6,7 @@
 #
 ##############################################################################
 
+require "./nrser/reason"
 require "./nrser/log"
 require "./rbenv/**"
 
@@ -19,4 +20,4 @@ if ENV.present?( "RBENV_LOCK_DEBUG" )
   {% end %}
 end
 
-Rbenv::Lock::Cmd.exec ARGV
+Rbenv::Lock::Run.new( ARGV ).exec

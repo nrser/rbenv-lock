@@ -1,16 +1,5 @@
-# Requirements
-# =======================================================================
-
-### Stdlib ###
-
-### Deps ###
-
-### Project / Package ###
-
-
 # Namespace
 # =======================================================================
-
 
 module Rbenv
 module Lock
@@ -22,6 +11,23 @@ module Lock
 # Base class for application-secific `Exception`.
 # 
 class Error < Exception
+  
+  def initialize( *message : _, **values : _ )
+    super( NRSER::Reason.format *message, **values )
+  end
+  
+  def initialize( message : String )
+    super( message )
+  end
+  
+end
+
+
+class Error::User < Error
+end
+
+
+class Error::User::Argument < Error::User
 end
 
 
@@ -36,7 +42,15 @@ end
 
 # Yes, we have shotty ad-hoc internal state. Yes, we're ashamed of it.
 # 
-class Error::Internal::State < Error
+class Error::Internal::State < Error::Internal
+end
+
+
+class Error::External < Error
+end
+
+
+class Error::External::Process < Error::External
 end
 
 

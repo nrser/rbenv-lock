@@ -2,6 +2,7 @@
 # =======================================================================
 
 require "yaml"
+require "file_utils"
 
 
 # Namespace
@@ -69,6 +70,11 @@ class Exe
   end
   
   
+  def self.exec_file_bin_path : String
+    File.join Lock.rbenv.root, "plugins", "bin", "rbenv-lock-exec-file"
+  end
+  
+  
   # The absolute path to a executable file given its name (relative to the 
   # current {.dir}).
   # 
@@ -92,7 +98,7 @@ class Exe
     end
     
     new name: File.basename( path ),
-        ruby_version: data[ "ruby_version" ].as_s,
+        ruby_version: Lock.rbenv.version_for( data[ "ruby_version" ].as_s ),
         target: data[ "target" ].as_s,
         gemset: data.has_key?( "gemset" ) ? data[ "gemset" ].as_s : nil,
         gem_name: data.has_key?( "gem_name" ) ? data[ "gem_name" ].as_s : nil,
@@ -135,7 +141,6 @@ class Exe
   # Instance Variables
   # ==========================================================================
   
-  @direct : Bool
   @env : Hash(String, String?)
   @gemdir : String?
   @gem_name : String?
@@ -157,6 +162,7 @@ class Exe
   getter name : String
   getter ruby_version : String
   getter target : String
+  property? direct : Bool
   
   
   # Construction
@@ -190,18 +196,115 @@ class Exe
   # Instance Methods
   # ==========================================================================
   
+  
+  def create( force : Bool = false, **kwds ) : Nil
+    if force || !File.exists?( path )
+      write **kwds
+    else
+      raise Error::User.new \
+        "Lock file exists: #{ path }, use --force to overwrite"
+    end
+  end
+  
+  
+  def to_data
+    {
+      ruby_version: ruby_version,
+      target: target,
+      gemset: gemset,
+      gem_name: gem_name,
+      path: path,
+      direct: direct?,
+      env: @env.dup,
+    }.to_h.compact
+  end
+  
+  
+  def gem_exe_path : String
+    Lock.rbenv.gem_exe_path( ruby_version )
+  end
+  
+  
+  def gem_spec : YAML::Any?
+    gem_name = self.gem_name.not_nil!
+    
+    capture = self.capture \
+      command: gem_exe_path,
+      args: { "specification", "--local", gem_name }
+    
+    if capture[ :status ].success?
+      YAML.parse capture[ :out ]
+    end
+  end
+  
+  
+  def ensure_gem : Nil
+    gem_spec = self.gem_spec
+    gem_version = self.gem_version
+    gem_name = self.gem_name.not_nil!
+    
+    # If the gem is not installed or isn't the right version...
+    if  gem_spec.nil? ||
+        (gem_version && gem_spec[ :version ].as_s != gem_version)
+    
+      # We need to install the gem
+      command = gem_exe_path
+      args = [ "install", gem_name, ]
+      
+      # Specify the version if we have one
+      if gem_version
+        args << "--version"
+        args << gem_version
+      end
+      
+      info "Installing gem #{ gem_name }...",
+        command: command,
+        args: args
+      
+      status = stream \
+        command: command,
+        args: args
+      
+      if status.success?
+        info "Installed gem #{ gem_name }"
+      else
+        raise Error::External::Process.new \
+          "Failed to install gem #{ gem_name }",
+          command: command,
+          args: args,
+          status: status
+      end
+    end # if need to install
+  end # #ensure_gem
+  
+  
+  def write( bin_only : Bool = false, mode : Int = 0o755 ) : Nil
+    unless bin_only
+      if (gemset_dir = self.gemset_dir)
+        unless File.directory? gemset_dir
+          FileUtils.mkdir_p gemset_dir, mode
+        end
+      end
+      
+      ensure_gem if gem?
+    end
+    
+    Dir.mkdir_p( self.class.dir ) unless File.directory?( self.class.dir)
+    
+    File.open path, "w" do |file|
+      file.puts "#!/usr/bin/env #{ self.class.exec_file_bin_path }"
+      file.puts
+      to_data.to_yaml file
+    end
+    
+    File.chmod path, mode
+  end
+  
+  
   # Absolute path to the lock file.
   # 
   def path : String
     @path ||= self.class.path_for name
-  end
-  
-  
-  # Does this lock go directly to the executable in `rbenv prefix $VERSION`
-  # (or does it route through the shim)?
-  # 
-  def direct?
-    @direct
   end
   
   
@@ -515,6 +618,46 @@ class Exe
     end # clean_ENV.tap
     
   end # #env
+  
+  
+  def capture(
+    command,
+    args,
+    shell = true,
+    env : Hash(String, String?) = {} of String => String?,
+  ) : { out: String, err: String, status: Process::Status }
+    out_io = IO::Memory.new
+    err_io = IO::Memory.new
+    
+    status = Process.run \
+      command: command,
+      args: args,
+      shell: shell,
+      env: self.env.merge_and_delete_nils!( env ),
+      clear_env: true,
+      output: out_io,
+      error: err_io
+    
+    { out: out_io.to_s, err: err_io.to_s, status: status }
+  end
+  
+  
+  def stream(
+    command,
+    args,
+    shell = true,
+    env : Hash(String, String?) = {} of String => String?,
+  ) : Process::Status
+    Process.run \
+      command: command,
+      args: args,
+      shell: shell,
+      env: self.env.merge_and_delete_nils!( env ),
+      clear_env: true,
+      input: Process::Redirect::Inherit,
+      output: Process::Redirect::Inherit,
+      error: Process::Redirect::Inherit
+  end # #stream
   
   
   # Swap the process out for a command run in the `#env`.

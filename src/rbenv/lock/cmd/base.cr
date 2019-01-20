@@ -7,6 +7,7 @@
 
 ### Project / Package ###
 
+require "../exit_status"
 require "../core_ext/option_parser"
 
 
@@ -92,7 +93,7 @@ abstract class Base
   # ==========================================================================
   
   # All input arguments
-  getter argv : Array(String)
+  getter args_in : Array(String)
   
   # State flag to tell when we've `parse!`d
   property? parsed : Bool = false
@@ -111,7 +112,7 @@ abstract class Base
   # ==========================================================================
   
   def initialize(
-    @argv : Array( String ),
+    @args_in : Array( String ),
     @out_io : IO = STDOUT,
     @err_io : IO = STDERR,
   )  
@@ -196,9 +197,7 @@ abstract class Base
     end
     
     parser.invalid_option do |flag|
-      err! "ERROR: #{flag} is not a valid option."
-      err! parser
-      self.status = ExitStatus::FAIL
+      raise Error::User::Argument.new "#{ flag } is not a valid option."
     end
     
     unless @@examples.empty?
@@ -277,11 +276,13 @@ abstract class Base
   
   def out!( *args ) : Nil
     @out_io.puts *args
+    @out_io.flush
   end
   
   
   def err!( *args ) : Nil
     @err_io.puts *args
+    @err_io.flush
   end
   
   
@@ -291,12 +292,12 @@ abstract class Base
   private def parse!
     check_not_parsed!
     
-    debug "Parsing..!", argv: argv
+    debug "Parsing..!", args_in: args_in
     @parsed = true
-    parser.parse argv
+    parser.parse args_in
     
     debug "Parsed.",
-      argv: argv,
+      args_in: args_in,
       args: args,
       double_dash_args: double_dash_args,
       status: @status
@@ -304,14 +305,20 @@ abstract class Base
   
   
   def run! : ExitStatus
+    debug "Running #{ self.class.canonical_name }..."
+    
     parse!
     
     if (status = @status)
+      debug "Status set during parse, returning.", status: status
       return status
     end
     
-    @status = on_run
-  end
+    on_run.tap { |status|
+      @status = status
+      debug "`#on_run` completed, returning.", status: status
+    }
+  end # #run!
   
   
   # Abstract hook that realizing classes must implement.

@@ -1,0 +1,6 @@
+version: 1.0
+shards:
+  shards:
+    github: crystal-lang/shards
+    commit: 4dd6e456eddbc2695c3f8e3e9b20c04d075bbbc8
+

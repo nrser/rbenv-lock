@@ -22,8 +22,19 @@
 #
 ##############################################################################
 
+require "./nrser/reason"
 require "./nrser/log"
 require "./rbenv/**"
+
+if ENV.present?( "RBENV_LOCK_DEBUG" )
+  {% if flag?( :release ) %}
+    # Flip to `-debug` version...
+    Process.exec command: "#{ PROGRAM_NAME }-debug", args: ARGV
+  {% else %}
+    # Set the log level
+    NRSER::Log.level = Logger::DEBUG
+  {% end %}
+end
 
 # The path to the lock YAML file
 path = ARGV[ 0 ]

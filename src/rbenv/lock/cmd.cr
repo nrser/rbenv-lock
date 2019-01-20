@@ -3,6 +3,9 @@
 
 # Project / Package
 # -----------------------------------------------------------------------
+
+require "./exit_status"
+require "./cmd/add"
 require "./cmd/help"
 require "./cmd/list"
 
@@ -19,24 +22,11 @@ module Lock
 
 module Cmd
   
-  enum ExitStatus
-    OK = 0
-    FAIL = 1
-    
-    def ok?
-      self == OK
-    end
-    
-    def fail?
-      !ok?
-    end
-  end
-  
   include NRSER::Log
   
   
   def self.all
-    { List, Help }
+    { Cmd::Add, Cmd::List, Cmd::Help }
   end
   
   
@@ -45,55 +35,28 @@ module Cmd
   end
   
   
-  def self.run(
-    argv : Array(String) = ARGV,
-    out_io : IO = STDOUT,
-    err_io : IO = STDERR,
-  ) : ExitStatus
-    debug "Starting #{ self.name }.run...", argv: argv
-    
-    if argv.empty?
-      cmd = "help"
-      args = [] of String
-    else
-      cmd = argv[ 0 ]
-      args = argv[ 1..-1 ]
-    end
-    
-    debug "Processed command", cmd: cmd, args: args
-    
-    cmd_class = Rbenv::Lock::Cmd.all.find do |cmd_class|
+  def self.find( name : String )
+    all.find { |cmd_class|
       debug "Checking command names for match...",
         cmd_class: cmd_class,
         names: cmd_class.names,
-        cmd: cmd
-      
-      cmd_class.names.includes? cmd
-    end
+        name: name
     
-    if cmd_class.nil?    
-      cmd_names = Rbenv::Lock::Cmd.names.join( "\n" )
-      
-      raise "Bad command: #{ cmd.inspect }\nAvailable:\n#{ cmd_names }"
-    end
-    
-    cmd_class.new( args, out_io: out_io, err_io: err_io ).run!
-  end # # .run
+      cmd_class.names.includes? name
+    }
+  end
   
   
-  def self.exec( argv : Array(String) = ARGV ) : NoReturn
-    # status = begin
-    #   run( argv )
-    # rescue e : Error::Internal
-    #   fatal "An internal error occured:", e.message,
-    # rescue e : Exception
-    #   fatal e.inspect_with_backtrace
-    #   ExitStatus::FAIL
-    # end
-    
-    status = run argv
-    
-    exit status.value
+  def self.find!( name : String )
+    find( name ).
+      tap { |cmd_class|
+        if cmd_class.nil?
+          raise Error::User::Argument.new \
+            "Bad command: #{ name.inspect }\n" \
+            "Available:\n#{ names.join( "\n" ) }"
+        end
+      }.
+      not_nil!
   end
   
 end # module Cmd
