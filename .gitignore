@@ -47,6 +47,10 @@ Temporary Items
 # Project
 # ============================================================================
 
+## Crystal
+/lib/shards/
+/lib/shards.sha1
+
 /tmp
 
 # Ignore Crystal builds
