@@ -28,7 +28,7 @@ class Exe
   # ==========================================================================
   
   def gem_spec : YAML::Any?
-    gem_name = self.gem_name.not_nil!
+    gem_name = self.gem_name
     
     capture = self.capture \
       command: gem_exe_path,
@@ -43,7 +43,7 @@ class Exe
   def ensure_gem : Nil
     gem_spec = self.gem_spec
     gem_version = self.gem_version
-    gem_name = self.gem_name.not_nil!
+    gem_name = self.gem_name
     
     # If the gem is not installed or isn't the right version...
     if  gem_spec.nil? ||

@@ -143,7 +143,7 @@ class Exe
       
       # Are we using a gemset?
       if (
-        (gemset = self.gemset) &&
+        (gemset = self.gemset?) &&
         (gemset_dir = self.gemset_dir) &&
         (gemset_bin_dir = self.gemset_bin_dir)
       )
@@ -180,7 +180,7 @@ class Exe
         end # if direct?
       end # if gemset?
       
-      if (gem_name = self.gem_name)
+      if (gem_name = self.gem_name?)
         # This is really just for persistence
         env[ "RBENV_LOCK_GEM" ] = gem_name
         # I don't think we need the version? It's just for installing?
