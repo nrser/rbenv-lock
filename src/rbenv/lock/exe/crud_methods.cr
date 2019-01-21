@@ -89,9 +89,14 @@ class Exe
   # Instance Methods
   # ==========================================================================
   
+  # Wrapper around `write!` that raises `Error::User` if `#path` already exists.
+  # 
+  # Provide `true` for the *force* parameter if you want it to just `write!` 
+  # regardless, clobbering anything that may have been there.
+  # 
   def create( force : Bool = false, **kwds ) : Nil
     if force || !File.exists?( path )
-      write **kwds
+      write! **kwds
     else
       raise Error::User.new \
         "Lock file exists: #{ path }, use --force to overwrite"
@@ -99,20 +104,10 @@ class Exe
   end
   
   
-  def to_data
-    {
-      ruby_version: ruby_version,
-      target: target,
-      gemset: gemset,
-      gem_name: gem_name,
-      path: path,
-      direct: direct?,
-      env: @env.dup,
-    }.to_h.compact
-  end
-  
-  
-  def write( bin_only : Bool = false, mode : Int = 0o755 ) : Nil
+  # Write the configuration to `#path`. Doesn't check what there or anything,
+  # just goes for it. Use `#create` if you want to be a little more careful.
+  # 
+  def write!( bin_only : Bool = false, mode : Int = 0o755 ) : Nil
     unless bin_only
       if (gemset_dir = self.gemset_dir)
         unless File.directory? gemset_dir
@@ -120,19 +115,29 @@ class Exe
         end
       end
       
-      ensure_gem if gem_name?
+      ensure_gem
     end
     
     Dir.mkdir_p( self.class.dir ) unless File.directory?( self.class.dir)
     
     File.open path, "w" do |file|
       file.puts "#!/usr/bin/env #{ self.class.exec_file_bin_path }"
-      file.puts
-      to_data.to_yaml file
+      {
+        ruby_version: ruby_version,
+        target: target,
+        gemset: gemset?,
+        gem_name: gem_name?,
+        path: path,
+        direct: direct?,
+        env: ( extra_env.empty? ? nil : extra_env.dup ),
+      }.
+        to_h.
+        compact.
+        to_yaml( file )
     end
     
     File.chmod path, mode
-  end
+  end # #write
   
   
 end # class Exe

@@ -67,16 +67,16 @@ class Exe
   # Instance Variables
   # ==========================================================================
   
-  @env : Hash(String, String?)
-  @path : String?
-  
   ## Dynamically Populated (Cache) Variables ##
   #
   # Instance variables that are either *expensive* (requiring a
   # shell-out/subprocess or file-system check) to populate, and are hence
   # resolved on demand via their associated methods.
   #
-  @gemdir : String?
+  
+  # Cache for `#ruby_version_gemdir`, which runs the `gem` executable for the
+  # `#ruby_version` to find the `gem env gemdir` value.
+  @ruby_version_gemdir : String?
   
   # Requires calling `#which`, which *at least* may hit the file system, and
   # likely can shell-out too when you consider the paths it needs.
@@ -88,13 +88,21 @@ class Exe
   
   ## Required Instance Variables ##
 
-  getter name : String
-  getter ruby_version : String
-  getter target : String
+  getter  name : String
+  getter  ruby_version : String
+  getter  target : String
+  getter  path : String
+  getter? direct : Bool
+  
+  # Any additional environment variables defined in the lock executable file
+  # that are merged in to the execution `#env`.
+  # 
+  # `nil` values mean to remove those variables when merging.
+  # 
+  getter extra_env : Hash(String, String?)
   
   ## Optional Instance Variables ##
   
-  getter! direct : Bool
   getter! gem_name : String?
   getter! gem_version : String?
   getter! gemset : String?
@@ -117,14 +125,15 @@ class Exe
     # (`#target_path` resolves it dynamically)
     @target_path = nil
     
+    # Set the `#path`
     @path = if path.nil?
-      nil
+      self.class.path_for @name
     else
       File.expand_path path
     end
     
-    @env = {} of String => String?
-    @env.merge!( env ) unless env.nil?
+    @extra_env = {} of String => String?
+    @extra_env.merge!( env ) unless env.nil?
   end # #initialize
   
 end # class Exe

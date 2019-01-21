@@ -118,19 +118,19 @@ class Exe
   # rbenv is mostly about using the correct environment, making this probably
   # the most important part of the application.
   # 
-  def env : Hash(String, String)
-    clean_ENV.tap do |env|
-      # Any `name => nil` in `@env` means delete that name
-      env.merge_and_delete_nils! @env
+  def env( from = clean_ENV, direct = direct? ) : Hash(String, String)
+    from.tap do |env|
+      # Any `name => nil` in `@extra_env` means delete that name
+      env.merge_and_delete_nils! @extra_env
       
       env[ "RBENV_VERSION" ] = ruby_version
       
-      # `direct?` sets things up to call *directly to the real bin, bypassing
+      # `direct` sets things up to call *directly to the real bin, bypassing
       # `rbenv` entirely*. This might have serious speed advantages, but also
       # seems likely to be riddled with issues and brittle with regards to
       # future changes... but I made it work, so I'm going to leave the code in
       # here as an option.
-      if direct?
+      if direct
         # Prefix the `PATH` with the bin dir for the Ruby version, like:
         # 
         #     "/Users/nrser/.rbenv/versions/2.3.6/bin:#{ ENV[ "PATH" ] }"
@@ -154,7 +154,7 @@ class Exe
         env[ "RBENV_GEMSETS" ] = gemset
         
         # Are we going directly?
-        if direct?
+        if direct
           # We need to do the work `rbenv-gemset` would have done...
           
           # Set `GEM_HOME` to the gemset's root, so that gems install there.

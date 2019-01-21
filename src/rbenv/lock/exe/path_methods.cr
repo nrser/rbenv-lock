@@ -30,10 +30,9 @@ class Exe
   # Where to put lock executables if nothing is specified in the environment
   # (see {Env}). Absolute path.
   # 
-  # Equivalent to `"$(rbenv root)/locks".
-  # 
-  # NOTE **$$$** - Needs the rbenv root, and calls `Rbenv::Client#root`, which
-  # shells-out to get it (on first call only).
+  # Equivalent to `"$(rbenv root)/locks", though it gets the root via 
+  # `Client#root`, which avoids the shell-out through using similar logic 
+  # in-process.
   # 
   def self.default_dir : String
     @@default_locks_dir ||= File.join( Rbenv::Lock.rbenv.root, "locks" )
@@ -74,13 +73,6 @@ class Exe
   
   # Instance Methods
   # ==========================================================================
-  
-  # Absolute path to the lock file.
-  # 
-  def path : String
-    @path ||= self.class.path_for name
-  end
-  
   
   def gem_exe_path : String
     Lock.rbenv.gem_exe_path( ruby_version )
@@ -131,33 +123,24 @@ class Exe
   # Get the absolute path to the `#ruby_version`'s gems directory (where gems
   # are typically installed for that version).
   # 
+  # NOTE **Expensive**, **Cached** - Creates a sub-process to run 
+  # `gem env gemdir` for the `#ruby_version`'s `Client#gem_exe_path`. Result is
+  # cached for life.
+  # 
   def ruby_version_gemdir : String
-    @gemdir ||= begin
+    @ruby_version_gemdir ||= begin
       clean_env = clean_ENV
       clean_env[ "RBENV_VERSION" ] = ruby_version
       
-      # Based off:
-      # 
-      # https://github.com/crystal-lang/crystal/blob/c9d1eef8fde5c7a03a029d64c8483ed7b4f2fe86/src/process.cr#L550
-      # 
-      process = Process.new \
+      NRSER::Process.chomp!(
         command: Lock.rbenv.gem_exe_path( ruby_version ),
         args: [ "env", "gemdir" ],
         shell: false,
-        input: Process::Redirect::Inherit,
-        output: Process::Redirect::Pipe,
-        error: Process::Redirect::Inherit,
         env: clean_env,
-        clear_env: true
-        
-      output = process.output.gets_to_end
-      
-      status = process.wait
-      $? = status
-      
-      output.chomp
+        clear_env: true,
+      )
     end
-  end # #gemdir
+  end # #ruby_version_gemdir
   
   
   # Find the path to a bin file.

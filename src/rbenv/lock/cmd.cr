@@ -9,6 +9,7 @@ require "./cmd/add"
 require "./cmd/exec"
 require "./cmd/help"
 require "./cmd/list"
+require "./cmd/show"
 
 
 # Namespace
@@ -27,7 +28,7 @@ module Cmd
   
   
   def self.all
-    { Cmd::List, Cmd::Add, Cmd::Exec, Cmd::Help }
+    { Cmd::List, Cmd::Show, Cmd::Add, Cmd::Exec, Cmd::Help }
   end
   
   

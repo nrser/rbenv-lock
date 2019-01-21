@@ -27,30 +27,33 @@ class Exe
   # returning a triple of the standard output `String`, standard error `String`,
   # and the exiting `Process::Status`.
   #
-  # NOTE This method **blocks** until the `Process` completes, via
-  # `Process.run`.
+  # NOTE This method **blocks** until the `Process` completes.
   #
   def capture(
     command,
     args,
     shell = true,
     env : Hash(String, String?) = {} of String => String?,
-  ) : { out: String, err: String, status: Process::Status }
-    
-    out_io = IO::Memory.new
-    err_io = IO::Memory.new
-    
-    status = Process.run \
+    direct = false,
+  ) : NRSER::Process::Capture
+    merged_env = self.env( direct: direct ).merge_and_delete_nils!( env )
+  
+    debug "Capturing...",
       command: command,
       args: args,
       shell: shell,
-      env: self.env.merge_and_delete_nils!( env ),
-      clear_env: true,
-      output: out_io,
-      error: err_io
-    
-    { out: out_io.to_s, err: err_io.to_s, status: status }
-    
+      direct: direct,
+      env: {
+        arg: env,
+        # merged: merged_env,
+      }
+  
+    NRSER::Process.capture \
+      command: command,
+      args: args,
+      shell: shell,
+      env: merged_env,
+      clear_env: true
   end # #capture
   
   

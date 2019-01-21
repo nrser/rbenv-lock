@@ -1,6 +1,10 @@
 # Requirements
 # ============================================================================
 
+### Stdlib ###
+
+require "yaml"
+
 ### Project / Package ###
 
 require "./base"
@@ -24,7 +28,7 @@ class Show < Base
   
   @@description = %{See what's going on with a lock.}
   
-  @@usage = "rbenv lock status NAME"
+  @@usage = "rbenv lock show NAME"
   
   @@examples = [
     {
@@ -46,7 +50,35 @@ class Show < Base
         "Lock executable #{ name.inspect } not found."
     end
     
-    # exe.status
+    gem_data = if exe.gem_name?
+      {
+        name: exe.gem_name?,
+        version: {
+          required: exe.gem_version?,
+          installed: exe.installed_gem_version,
+          is_satisfied: exe.gem_version_satisfied?,
+        },
+        # spec: exe.gem_spec,
+      }
+    else
+      {} of Symbol => Nil
+    end
+    
+    data = {
+      name: exe.name,
+      path: exe.path,
+      target: {
+        name: exe.target,
+        path: exe.target_path,
+      },
+      ruby_version: exe.ruby_version,
+      direct: exe.direct?,
+      env: exe.env( {} of String => String ),
+      gemset: exe.gemset?,
+      gem: gem_data,
+    }
+    
+    YAML.dump data, STDOUT
     
     ExitStatus::OK
   end

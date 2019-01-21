@@ -26,6 +26,7 @@ class Client
     "'" + string.gsub( "\\", "\\\\" ).gsub( "'", "\\'" ) + "'"
   end
   
+  
   def self.quote( strings : Enumerable(String) ) : String
     return "" if strings.empty?
     
@@ -34,6 +35,10 @@ class Client
       map { |string| quote string }.
       join( " " )
   end
+  
+  
+  # Instance Variables
+  # ==========================================================================
   
   @current : String? = nil
   @global : String? = nil
@@ -48,7 +53,6 @@ class Client
     @prefixes = {} of String => String
     @gem_dirs = {} of String => String
   end
-  
   
   
   # Instance Methods
@@ -171,7 +175,7 @@ class Client
   
   # Overload to handle splat *args*.
   # 
-  def run!( subcmd, *args : String ) : String
+  def run!( subcmd, *args : String )
     run! subcmd, args
   end
   
