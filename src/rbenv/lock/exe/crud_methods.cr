@@ -25,7 +25,7 @@ class Exe
   # Class Methods
   # ==========================================================================
   
-  # Load a lock up from a `YAML` file path.
+  # Load a lock up from it's `#name` or `#path`.
   # 
   def self.load( name_or_path ) : self
     path = if File.file? name_or_path
