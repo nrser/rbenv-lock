@@ -8,12 +8,13 @@
 
 require "./nrser/reason"
 require "./nrser/log"
+require "./nrser/process"
 require "./rbenv/**"
 
 if ENV.present?( "RBENV_LOCK_DEBUG" )
   {% if flag?( :release ) %}
     # Flip to `-debug` version...
-    Process.exec command: "#{ PROGRAM_NAME }-debug", args: ARGV
+    Process.exec command: "#{ Process.executable_path }-debug", args: ARGV
   {% else %}
     # Set the log level
     NRSER::Log.level = Logger::DEBUG
