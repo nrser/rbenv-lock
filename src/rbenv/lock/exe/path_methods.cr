@@ -152,7 +152,7 @@ class Exe
   # 
   # NOTE
   # 
-  # This method was essentailly coppied over from the Ruby version, and I'm not
+  # This method was essentially copied over from the Ruby version, and I'm not
   # entirely sure why it was written like this... it seems to try to form the
   # path *without* actually seeing where files are and aren't... but besides
   # the time cost, there doesn't appear to be any other reason for that..?

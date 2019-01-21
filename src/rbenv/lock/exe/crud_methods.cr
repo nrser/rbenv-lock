@@ -120,7 +120,7 @@ class Exe
         end
       end
       
-      ensure_gem if gem?
+      ensure_gem if gem_name?
     end
     
     Dir.mkdir_p( self.class.dir ) unless File.directory?( self.class.dir)

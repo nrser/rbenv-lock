@@ -68,27 +68,36 @@ class Exe
   # ==========================================================================
   
   @env : Hash(String, String?)
-  @gemdir : String?
-  @gem_name : String?
-  @gem_version : String?
-  @gemset : String?
-  @name : String
   @path : String?
-  @ruby_version : String
-  @target : String
+  
+  ## Dynamically Populated (Cache) Variables ##
+  #
+  # Instance variables that are either *expensive* (requiring a
+  # shell-out/subprocess or file-system check) to populate, and are hence
+  # resolved on demand via their associated methods.
+  #
+  @gemdir : String?
+  
+  # Requires calling `#which`, which *at least* may hit the file system, and
+  # likely can shell-out too when you consider the paths it needs.
   @target_path : String?
   
   
   # Properties
   # ==========================================================================
   
-  getter gem_name : String?
-  getter gem_version : String?
-  getter gemset : String?
+  ## Required Instance Variables ##
+
   getter name : String
   getter ruby_version : String
   getter target : String
-  property? direct : Bool
+  
+  ## Optional Instance Variables ##
+  
+  getter! direct : Bool
+  getter! gem_name : String?
+  getter! gem_version : String?
+  getter! gemset : String?
   
   
   # Construction
@@ -116,36 +125,7 @@ class Exe
     
     @env = {} of String => String?
     @env.merge!( env ) unless env.nil?
-  end
-  
-  
-  # Instance Methods
-  # ==========================================================================
-  
-  
-  # Does this lock use a gemset (required `rbenv-gemset` plugin)?
-  # 
-  # NOTE
-  #
-  # Not all that useful since the type system doesn't let you gaurd on this then
-  # work as if `#gemset` is not `nil`, presumably because of concurrency..?
-  # 
-  def gemset?
-    !@gemset.nil?
-  end
-  
-  
-  # Do we have a {#gem_name}?
-  #
-  # NOTE
-  #
-  # Not all that useful since the type system doesn't let you gaurd on this then
-  # work as if `#gem_name` is not `nil`, presumably because of concurrency..?
-  #
-  def gem?
-    !@gem_name.nil?
-  end
-  
+  end # #initialize
   
 end # class Exe
 
