@@ -95,6 +95,9 @@ class Client
   # rbenv Command Execution
   # --------------------------------------------------------------------------
   
+  # Returns a version of the `PATH` environment variable ensured to contain 
+  # `#libexec_path` (prepended if not present).
+  # 
   def env_PATH : String
     @env_PATH = begin
       value = ENV[ "PATH" ]
@@ -109,6 +112,20 @@ class Client
   end
   
   
+  # Run a rbenv sub-command in a sub-process and return the standard output,
+  # raising `Lock::Error::External::Process` if it fails.
+  # 
+  # For the sake of efficiency it goes directly to the `rbenv-SUBCMD` executable
+  # in `#libexec_path`, instead of through the main `rbenv` executable like
+  # `rbenv SUBCMD` would. This requires a bit more care, and may not behave 
+  # exactly the same in all cases, though I've made an effort to take it into
+  # account.
+  # 
+  # Since rbenv-lock's executables may be run *outside* of rbenv (without going
+  # through the main `rbenv` executable like `rbenv lock ARGS...`) we may need
+  # to modify the `PATH` environment variable to include `#libexec_path`; see
+  # `#env_PATH`.
+  # 
   def run!(
     subcmd : String | Symbol,
     args : Enumerable(String)? = nil
