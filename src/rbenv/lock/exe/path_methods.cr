@@ -28,9 +28,12 @@ class Exe
   # ==========================================================================
   
   # Where to put lock executables if nothing is specified in the environment
-  # (see {Env}):.
+  # (see {Env}). Absolute path.
   # 
   # Equivalent to `"$(rbenv root)/locks".
+  # 
+  # NOTE **$$$** - Needs the rbenv root, and calls `Rbenv::Client#root`, which
+  # shells-out to get it (on first call only).
   # 
   def self.default_dir : String
     @@default_locks_dir ||= File.join( Rbenv::Lock.rbenv.root, "locks" )
@@ -47,6 +50,15 @@ class Exe
   end
   
   
+  # The absolute path to the `rbenv-lock-exe-file` executable, which serves as
+  # the entry point when running lock executables, and as such is the "shebang"
+  # target for lock executable files.
+  # 
+  # NOTE **$$$** - Needs the rbenv root, and calls `Rbenv::Client#root`, which
+  # shells-out to get it (on first call only).
+  # 
+  # TODO Might be nice to be configurable.
+  # 
   def self.exec_file_bin_path : String
     File.join Lock.rbenv.root, "plugins", "bin", "rbenv-lock-exec-file"
   end
