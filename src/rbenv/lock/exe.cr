@@ -85,12 +85,18 @@ class Exe
   
   # Load a lock up from a `YAML` file path.
   # 
-  def self.load( path ) : self
+  def self.load( name_or_path ) : self
+    path = if File.file? name_or_path
+      name_or_path
+    else
+      path_for name_or_path
+    end
+    
     contents = File.read path
     data = YAML.parse( contents ).as_h
     
-    env = if data.has_key?( "gem_name" )
-      data[ "gem_name" ].as_h.map { |k, v|
+    env = if data.has_key?( "env" )
+      data[ "env" ].as_h.map { |k, v|
         [ k.as_s, v.as_s ]
       }.to_h
     else

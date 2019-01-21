@@ -6,6 +6,7 @@
 
 require "./exit_status"
 require "./cmd/add"
+require "./cmd/exec"
 require "./cmd/help"
 require "./cmd/list"
 
@@ -26,7 +27,7 @@ module Cmd
   
   
   def self.all
-    { Cmd::Add, Cmd::List, Cmd::Help }
+    { Cmd::List, Cmd::Add, Cmd::Exec, Cmd::Help }
   end
   
   
