@@ -120,7 +120,7 @@ class Exe
     File.join? \
       Lock.rbenv.prefix( ruby_version ),
       "gemsets",
-      gemset
+      gemset?
   end
   
   
