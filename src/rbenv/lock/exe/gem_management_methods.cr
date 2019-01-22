@@ -39,7 +39,7 @@ class Exe
     
     capture = self.capture \
       command: gem_exe_path,
-      args: { "specification", "specification", gem_name },
+      args: { "specification", "--local", gem_name },
       direct: true
     
     debug "Captured gemspec",
