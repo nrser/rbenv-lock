@@ -46,12 +46,7 @@ class Exec < Base
       [] of String
     end
     
-    exe = Rbenv::Lock::Exe.load name
-    
-    if exe.nil?
-      raise Error::User::Argument.new \
-        "Lock executable #{ name.inspect } not found."
-    end
+    exe = Rbenv::Lock::Exe.load! name
     
     exe.exec exec_command, exec_args
   end

@@ -43,12 +43,7 @@ class Show < Base
   def on_run
     name = args[0]
     
-    exe = Rbenv::Lock::Exe.load name
-    
-    if exe.nil?
-      raise Error::User::Argument.new \
-        "Lock executable #{ name.inspect } not found."
-    end
+    exe = Rbenv::Lock::Exe.load! name
     
     gem_data = if exe.gem_name?
       {

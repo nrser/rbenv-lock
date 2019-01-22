@@ -40,23 +40,6 @@ module Lock
 # 
 class Exe
   
-  # Constants
-  # ==========================================================================
-  
-  # TODO Still needed?
-  # 
-  DIRTY_ENV_NAMES = {
-    "GEM_HOME",
-    "GEM_PATH",
-    "RBENV_DIR",
-    "RBENV_HOOK_PATH",
-    "RBENV_VERSION",
-    
-    # Additional places that Ruby will search when `require`ing.
-    "RUBYLIB",
-  }
-  
-  
   # Mixins
   # ==========================================================================
   

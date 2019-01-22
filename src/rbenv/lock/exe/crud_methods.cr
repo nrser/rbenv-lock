@@ -25,13 +25,20 @@ class Exe
   # Class Methods
   # ==========================================================================
   
-  # Load a lock up from it's `#name` or `#path`.
+  # Load a lock up from it's `#name` or `#path`, raising `Error::User::Argument`
+  # if it's not found.
   # 
-  def self.load( name_or_path ) : self
-    path = if File.file? name_or_path
-      name_or_path
+  def self.load!( name_or_path : String ) : self
+    name, path = if name_or_path.includes? File::SEPARATOR
+      expanded = File.expand_path name_or_path
+      { File.basename( expanded ), expanded }
     else
-      path_for name_or_path
+      { name_or_path, path_for( name_or_path ) }
+    end
+    
+    unless File.file? path
+      raise Error::User::Argument.new \
+        "Lock executable #{ name.inspect } not found at `#{ path }"
     end
     
     contents = File.read path
@@ -53,19 +60,22 @@ class Exe
         path: path,
         direct: !!( data.has_key?( "direct" ) ? data[ "direct" ].raw : false ),
         env: env
-  end # .load
+  end # .load!
   
   
   # Get a list of all locks in `.dir`.
   # 
-  def self.list : Array(self)
+  def self.list( quiet = false ) : Array(self)
     dir = self.dir
     
     locks = [] of self
     
     # Bail out `.dir` doesn't exist.
     unless File.directory?( dir )
-      # TODO warn "Locks directory #{ dir } does not exist!", dir: dir
+      unless quiet
+        warn "Locks directory `#{ dir }` does not exist!"
+      end
+      
       return locks
     end
     
@@ -74,10 +84,11 @@ class Exe
       
       if File.file?( path )
         begin
-          locks << load( path )
+          locks << load!( path )
         rescue error : Exception
-          warn "Failed to load lock bin file",
-            path: path
+          unless quiet
+            warn "Failed to load lock executable file at `#{ path }`"
+          end
         end
       end
     end
@@ -96,7 +107,7 @@ class Exe
   # 
   def create( force : Bool = false, **kwds ) : Nil
     if force || !File.exists?( path )
-      write! **kwds
+      write **kwds
     else
       raise Error::User.new \
         "Lock file exists: #{ path }, use --force to overwrite"
@@ -107,7 +118,7 @@ class Exe
   # Write the configuration to `#path`. Doesn't check what there or anything,
   # just goes for it. Use `#create` if you want to be a little more careful.
   # 
-  def write!( bin_only : Bool = false, mode : Int = 0o755 ) : Nil
+  def write( bin_only : Bool = false, mode : Int = 0o755 ) : Nil
     unless bin_only
       if (gemset_dir = self.gemset_dir)
         unless File.directory? gemset_dir
@@ -127,7 +138,6 @@ class Exe
         target: target,
         gemset: gemset?,
         gem_name: gem_name?,
-        path: path,
         direct: direct?,
         env: ( extra_env.empty? ? nil : extra_env.dup ),
       }.
@@ -138,6 +148,65 @@ class Exe
     
     File.chmod path, mode
   end # #write
+  
+  
+  # `rm` the `#path`.
+  # 
+  # Returns `true` if the file was removed, `false` if it wasn't (in which case
+  # a warning is logged).
+  # 
+  def remove_path : Bool
+    if path_exists?
+      FileUtils.rm path
+      info "Lock executable file for `#{ name }` at `#{ path }` removed."
+      true
+    else
+      warn  "Lock executable file for `#{ name }` does not exist at " \
+            "`#{ path }`, can't remove."
+      false
+    end
+  end
+  
+  
+  # Remove the `#gemset` by removing `#gemset_dir`.
+  # 
+  # Returns `true` if the file was removed, `false` if it wasn't (in which case
+  # a warning is logged).
+  # 
+  def remove_gemset : Bool
+    if (gemset_dir = self.gemset_dir)
+      FileUtils.rm_rf gemset_dir
+      info "Gemset `#{ gemset }` at `#{ gemset_dir }` removed."
+      true
+    else
+      warn "Lock `#{ name }` does not have a gemset, can't remove."
+      false
+    end
+  end
+  
+  
+  # Flexible method for removing any, and, or all of:
+  # 
+  # 1.  The executable file at `#path` (see `#remove_path`).
+  # 2.  The `#gem_name` Gem (see `#remove_gem`).
+  # 3.  The `#gemset` at `#gemset_dir` (see `#remove_gemset`).
+  # 
+  # You can control which methods are called with the *path*, *gem* and *gemset*
+  # `Bool` parameters.
+  # 
+  # When a parameter is omitted, 
+  # 
+  def remove(
+    path : Bool = path_exists?,
+    gemset : Bool = !!self.gemset?,
+    gem : Bool = gem_installed?,
+  ) : { path: Bool?, gemset: Bool?, gem: Bool? }
+    {
+      path: (remove_path if path),
+      gem: (remove_gem if gem),
+      gemset: (remove_gemset if gemset),
+    }
+  end # #remove
   
   
 end # class Exe

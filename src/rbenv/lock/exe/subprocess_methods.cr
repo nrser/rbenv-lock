@@ -45,7 +45,7 @@ class Exe
       direct: direct,
       env: {
         arg: env,
-        # merged: merged_env,
+        merged: self.class.filter_env( merged_env ),
       }
   
     NRSER::Process.capture \
@@ -70,12 +70,25 @@ class Exe
     args,
     shell = true,
     env : Hash(String, String?) = {} of String => String?,
+    direct = false,
   ) : Process::Status
+    merged_env = self.env( direct: direct ).merge_and_delete_nils!( env )
+  
+    debug "Streaming...",
+      command: command,
+      args: args,
+      shell: shell,
+      direct: direct,
+      env: {
+        arg: env,
+        merged: self.class.filter_env( merged_env ),
+      }
+  
     Process.run \
       command: command,
       args: args,
       shell: shell,
-      env: self.env.merge_and_delete_nils!( env ),
+      env: merged_env,
       clear_env: true,
       input: Process::Redirect::Inherit,
       output: Process::Redirect::Inherit,
@@ -90,9 +103,27 @@ class Exe
   end
   
   
+  # Accept splat *args* and **kwds** and pass to the `Array` version.
+  # 
+  # EXAMPLE Adding a *direct* named parameter after the *args* splat
+  # 
+  #     stream gem_exe_path, "specification", "--local", "qb", direct: true
+  # 
+  def stream( command : String, *args : String, **kwds )
+    stream command, args, **kwds
+  end
+  
+  
   # Swap the process out for a command run in the `#env` via `Process.exec`.
   # 
   def exec( command : String, args : Array(String) )
+    env = self.env
+    
+    debug "Exec'ing command...",
+      command: command,
+      args: args,
+      env: self.class.filter_env( env )
+    
     Process.exec \
       command: command,
       args: args,
@@ -105,7 +136,7 @@ class Exe
   # Accept splat *args* and pass to the `Array` version.
   # 
   def exec( command : String, *args : String )
-    exec command, aargs
+    exec command, args
   end
   
   

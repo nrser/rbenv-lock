@@ -59,7 +59,16 @@ class Exe
   # TODO Might be nice to be configurable.
   # 
   def self.exec_file_bin_path : String
-    File.join Lock.rbenv.root, "plugins", "bin", "rbenv-lock-exec-file"
+    if path = Process.executable_path
+      File.join File.dirname( path ), "rbenv-lock-exec-file"
+    else
+      File.join \
+        Lock.rbenv.root,
+        "plugins",
+        "rbenv-lock",
+        "bin",
+        "rbenv-lock-exec-file"
+    end
   end
   
   
@@ -74,6 +83,17 @@ class Exe
   # Instance Methods
   # ==========================================================================
   
+  # Does a file exist at `#path`?
+  # 
+  def path_exists? : Bool
+    File.exists? path
+  end
+  
+  
+  # Absolute path to the `#ruby_version`'s `gem` executable.
+  # 
+  # See `Client#gem_exe_path`.
+  # 
   def gem_exe_path : String
     Lock.rbenv.gem_exe_path( ruby_version )
   end

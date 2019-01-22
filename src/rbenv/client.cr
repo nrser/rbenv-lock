@@ -136,39 +136,36 @@ class Client
   ) : String
     
     path = File.join libexec_path, "rbenv-#{ subcmd }"
-    env = { "PATH" => env_PATH }
+    env = {
+      # Add the path with libexec on it
+      "PATH" => env_PATH,
+      
+      # Since we're going *directly* to the libexec file we **NEED** to set
+      # `RBENV_ROOT` because `libexec` files *other* than the main/plain `rbenv`
+      # expect it to have been set by `rbenv` at some point prior...
+      "RBENV_ROOT" => root,
+    }
     
     debug "Run!ing rbenv sub-command...",
       subcmd: subcmd,
-      path: path
+      path: path,
+      args: args
     
-    out_io = IO::Memory.new
-    err_io = IO::Memory.new
-    
-    status = Process.run \
+    capture = NRSER::Process.capture! \
       command: path,
       args: args,
       shell: false,
       env: env,
-      clear_env: false,
-      output: out_io,
-      error: err_io
-    
-    if status.success?
-      out_s = out_io.to_s
+      clear_env: false
+
+    debug "rbenv sub-command succeeded.",
+      subcmd: subcmd,
+      path: path,
+      args: args,
+      output: capture.output,
+      error: capture.error
       
-      debug "rbenv sub-command succeeded.",
-        subcmd: subcmd,
-        path: path,
-        output: out_s
-      
-      return out_s
-    end
-      
-    # We had an error...
-    
-    raise Lock::Error::External::Process.new \
-      "Error running `rbenv-#[ subcmd }`:\n#{ err_io }"
+    capture.output
     
   end # #run!
   

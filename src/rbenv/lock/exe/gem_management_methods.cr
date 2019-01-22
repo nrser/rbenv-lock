@@ -39,7 +39,7 @@ class Exe
     
     capture = self.capture \
       command: gem_exe_path,
-      args: { "specification", "--local", gem_name },
+      args: { "specification", "specification", gem_name },
       direct: true
     
     debug "Captured gemspec",
@@ -51,6 +51,9 @@ class Exe
   end
   
   
+  # Get the version of the gem installed. If there is no `#gem_name` returns
+  # `nil`.
+  # 
   def installed_gem_version : String?
     gem_spec = self.gem_spec
     
@@ -60,6 +63,20 @@ class Exe
   end
   
   
+  # Is the gem installed? If there is no `#gem_name` returns `false`.
+  # 
+  def gem_installed? : Bool
+    !installed_gem_version.nil?
+  end
+  
+  
+  # Is the associated `#gem_version` satisfied by the `#installed_gem_version`?
+  # 
+  # If there is no `#gem_name` returns `nil`.
+  # 
+  # If there is no `#gem_version`, returns `true` if there is any version 
+  # installed, else `false`.
+  # 
   def gem_version_satisfied? : Bool?
     # If we don't have a gem name, this whole thing makes no sense...
     return nil unless gem_name?
@@ -81,7 +98,6 @@ class Exe
       # We have no version requirement, so any installed version will do
       !installed_gem_version.nil?
     end
-    
   end # #gem_version_satisfied?
   
   
@@ -114,7 +130,8 @@ class Exe
     
     status = stream \
       command: command,
-      args: args
+      args: args,
+      direct: true
     
     if status.success?
       info "Installed gem #{ gem_name }"
@@ -127,6 +144,31 @@ class Exe
     end
     
   end # #install_gem!
+  
+  
+  
+  # Remove the `#gem_name` gem.
+  # 
+  # Returns `true` if the Gem was removed, `false` if it wasn't (in which case
+  # a warning is logged).
+  # 
+  def remove_gem : Bool
+    if (gem_name = gem_name?)
+      if gem_installed?
+        info "Removing gem `#{ gem_name }` from Ruby #{ ruby_version }..."
+        stream "gem", { "uninstall", gem_name }
+        info "Gem `#{ gem_name }` removed from Ruby #{ ruby_version }."
+        true
+      else
+        warn  "Gem `#{ gem_name}` is not installed," \
+              "can't remove for lock `#{ name }`."
+        false
+      end
+    else
+      warn "Lock `#{ name }` does not have an associated gem, can't remove."
+      false
+    end
+  end
   
 end # class Exe
 

@@ -44,7 +44,7 @@ path = ARGV[ 0 ]
 args = ARGV[ 1..-1 ]
 
 # Load the lock up from the file
-lock = Rbenv::Lock::Exe.load path
+exe = Rbenv::Lock::Exe.load! path
 
 # And swap out for the target, passing it the args
-lock.exec_target args
+exe.exec_target args

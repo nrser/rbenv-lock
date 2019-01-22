@@ -9,6 +9,7 @@ require "./cmd/add"
 require "./cmd/exec"
 require "./cmd/help"
 require "./cmd/list"
+require "./cmd/remove"
 require "./cmd/show"
 
 
@@ -28,7 +29,7 @@ module Cmd
   
   
   def self.all
-    { Cmd::List, Cmd::Show, Cmd::Add, Cmd::Exec, Cmd::Help }
+    { Cmd::List, Cmd::Show, Cmd::Add, Cmd::Remove, Cmd::Exec, Cmd::Help }
   end
   
   

@@ -66,26 +66,27 @@ class Add < Base
     },
   ]
   
-  property? force : Bool = false
+  getter? force : Bool = false
   
-  property? bin_only : Bool = false
+  getter? bin_only : Bool = false
   
   getter gemset : Nil | String = nil
   
-  property? implicit_gemset : Bool = false
+  getter? implicit_gemset : Bool = false
   
   getter gem : Nil | String = nil
   
-  property? implicit_gem : Bool = false
+  getter? implicit_gem : Bool = false
   
-  property? direct : Bool = false
+  getter? direct : Bool = false
+  
   
   protected def init_options( parser ) : Nil
     
     parser.on(
       "-s", "--gemset",
-      %{Implicit version of `--gem=GEMSET` option - the *gem name* will},
-      %{be used as the name of the gemset.},
+      %{Implicit version of `--gem=GEMSET` option - the *gem name* will\n} \
+      %{be used as the name of the gemset.}
     ) { @implicit_gemset = true }
     
     parser.on(
@@ -99,8 +100,8 @@ class Add < Base
     
     parser.on(
       "-g", "--gem",
-      %{Implicit version of `--gem=NAME@VERSION` - the *executable* name will},
-      %{be used as the name of the gem.},
+      %{Implicit version of `--gem=NAME@VERSION` - the *executable* name will\n} \
+      %{be used as the name of the gem.}
     ) { @implicit_gem = true }
     
     parser.on(
@@ -116,26 +117,26 @@ class Add < Base
       %{If NAME is omitted, the gem name is assumed to be the same as the BIN.\n} \
       %{ \n} \
       %{You can use something like `--gem=@0.3.0` to provide a gem version\n} \
-      %{and assume the gem name is BIN.\n}
+      %{and assume the gem name is BIN.}
     ) { |gem| @gem = gem }
     
     parser.on(
       "--bin-only",
-      "Just write the lock bin file, don't create gemsets, install gems, etc.",
+      %{Just write the lock bin file, don't create gemsets, install gems, etc.}
     ) { @bin_only = true }
     
     parser.on(
       "-f", "--force",
-      "Overwrite lock file if exists",
+      %{Overwrite lock file if exists}
     ) { @force = true }
     
     parser.on(
-      "-d", "--direct",
-      "Bypass rbenv completely and directly execute the target executable.",
-      "",
-      "WARNING: This is considerably faster, but does not completely emulate",
-      "rbenv and rbenv-gemset behavior, and ignores any other plugins",
-      "completely."
+      "--direct",
+      %{Bypass rbenv completely and directly execute the target executable.\n} \
+      %{ \n} \
+      %{WARNING: This is considerably faster, but does not completely emulate\n} \
+      %{rbenv and rbenv-gemset behavior, and ignores any other plugins\n} \
+      %{completely.\n}
     ) { @direct = true }
   end
   

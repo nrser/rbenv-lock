@@ -23,6 +23,49 @@ module Lock
 
 class Exe
   
+  # Constants
+  # ==========================================================================
+  
+  # `ENV` var names to filter out of "clean" environments.
+  # 
+  # See `#clean_ENV`.
+  # 
+  DIRTY_ENV_NAMES = Set{
+    "GEM_HOME",
+    "GEM_PATH",
+    "RBENV_DIR",
+    "RBENV_HOOK_PATH",
+    "RBENV_VERSION",
+    
+    # Additional places that Ruby will search when `require`ing.
+    "RUBYLIB",
+  }
+  
+  
+  # Class Methods
+  # ==========================================================================
+  
+  # Select only interesting-looking environment variables from an *env*.
+  # 
+  # Used when logging environments to make it more reasonable to read.
+  # 
+  def self.filter_env( env )
+    env.select { |name, value|
+      case name
+      when /\ARUBY/, /\ARBENV/, /\AGEM/
+        true
+      when "PATH"
+        true
+      else
+        false
+      end
+    }
+  end
+  
+  
+  # Instance Methods
+  # ==========================================================================
+  
   # Get a copy of `ENV[ "PATH" ]` stripped of all rbenv and rbenv-gemset
   # elements:
   #
@@ -97,16 +140,7 @@ class Exe
   # 
   def clean_ENV : Hash(String, String)
     ENV.to_h.tap { |env|
-      env.reject! { |name, value|
-        case name
-        when /\ARBENV_/
-          true
-        when "GEM_HOME", "GEM_PATH"
-          true
-        else
-          false
-        end
-      }
+      env.reject! { |name, value| DIRTY_ENV_NAMES.includes? name }
       
       env[ "PATH" ] = clean_PATH
     }
@@ -123,7 +157,11 @@ class Exe
       # Any `name => nil` in `@extra_env` means delete that name
       env.merge_and_delete_nils! @extra_env
       
+      # We always want this guy set
       env[ "RBENV_VERSION" ] = ruby_version
+      
+      # And the root as well, in case we go strait to a libexec file
+      env[ "RBENV_ROOT" ] = Lock.rbenv.root
       
       # `direct` sets things up to call *directly to the real bin, bypassing
       # `rbenv` entirely*. This might have serious speed advantages, but also
@@ -138,7 +176,12 @@ class Exe
         # We omit the paths to `Rbenv::Client#libexec_path` and the rbenv hooks,
         # since we really shouldn't need them.
         # 
-        env[ "PATH" ] = "#{ version_bin_dir }:#{ env[ "PATH" ] }"
+        env[ "PATH" ] = \
+          if (current_PATH = env[ "PATH" ]?)
+            "#{ version_bin_dir }:#{ current_PATH }"
+          else
+            version_bin_dir
+          end
       end
       
       # Are we using a gemset?
@@ -189,6 +232,7 @@ class Exe
     end # clean_ENV.tap
     
   end # #env
+  
   
 end # class Exe
 

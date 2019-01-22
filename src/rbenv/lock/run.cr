@@ -80,7 +80,7 @@ class Run
       
     rescue e : Error::Internal
       {% if flag?( :release ) %}
-        fatal "An internal error occured: #{ e.message }"
+        fatal "An internal error occurred: #{ e.message }"
         ExitStatus::FAIL
       {% else %}
         raise e
@@ -88,7 +88,7 @@ class Run
       
     rescue e : Exception
       {% if flag?( :release ) %}
-        fatal "An unexpected error occured: #{ e.message }"
+        fatal "An unexpected error occurred: #{ e.message }"
         ExitStatus::FAIL
       {% else %}
         raise e
