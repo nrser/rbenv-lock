@@ -96,6 +96,32 @@ class Client
   end
   
   
+  # Given a version string directly  form the "standard" version "prefix" path
+  # of `$ROOT/versions/$VERSION`.
+  #
+  # This is done to avoid shell-outs - if it exists, we assume it's the right
+  # place without running sub-processes.
+  #
+  def standard_prefix_for( version : String ) : String
+    File.join root, "versions", version
+  end
+  
+  
+  # If the `#standard_prefix_for` the *version* is a directory, return it's
+  # absolute path. Otherwise, return `nil`.
+  #
+  # This is helpful with avoiding running sub-processes - if we find that
+  # directory, we just assume it's the right place and use it.
+  #
+  def uses_standard_prefix?( version : String ) : String?
+    prefix = self.standard_prefix_for version
+    
+    if File.directory? prefix
+      return prefix 
+    end
+  end
+  
+  
   # rbenv Command Execution
   # --------------------------------------------------------------------------
   
@@ -265,7 +291,13 @@ class Client
   # sub-process. Result cached forever after first call (pre *version*).
   # 
   def prefix( version : String ) : String
-    @prefixes[ version ] ||= run!( :prefix, version ).chomp
+    @prefixes[ version ] ||= begin
+      if (prefix = uses_standard_prefix?( version ))
+        prefix
+      else
+        run!( :prefix, version ).chomp
+      end
+    end
   end
   
   
@@ -306,7 +338,9 @@ class Client
     when "global"
       global
     else
-      if versions.includes? requirement
+      if uses_standard_prefix?( requirement )
+        requirement
+      elsif versions.includes? requirement
         requirement
       else
         version_for requirements: { requirement }
