@@ -1,6 +1,10 @@
 # Requirements
 # =======================================================================
 
+### Deps ###
+
+require "nrser/log"
+
 # Project / Package
 # -----------------------------------------------------------------------
 
@@ -18,7 +22,7 @@ module Lock
 # Definitions
 # =======================================================================
 
-# Represnets a run of the application.
+# Represents a run of the application.
 # 
 class Run
   

@@ -28,9 +28,11 @@ SOURCES := $(shell find $(SRC) -name '*.cr')
 DEBUG_TARGETS := $(OUT)/rbenv-lock-exec-file-debug $(OUT)/rbenv-lock-debug
 RELEASE_TARGETS := $(OUT)/rbenv-lock-exec-file $(OUT)/rbenv-lock
 
+# export CRYSTAL_PATH := /usr/local/Cellar/crystal/0.27.0/src:lib:src
+export CRYSTAL_PATH := $(shell crystal env CRYSTAL_PATH):src
 
 # [.PHONY][] means `all` is not a file, but just a task (I think...)
-.PHONY: all debug release clean clean-docs serve-docs docs remake blah
+.PHONY: all debug release clean clean-docs serve-docs docs remake spec blah
 
 
 # Build 'em all!
@@ -84,6 +86,10 @@ clean:
 
 # Re-make everything by cleaning then making everything
 remake: clean all
+
+
+spec:
+	crystal spec
 
 
 clean-docs:

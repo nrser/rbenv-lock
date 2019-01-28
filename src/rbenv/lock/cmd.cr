@@ -1,8 +1,11 @@
 # Requirements
 # =======================================================================
 
-# Project / Package
-# -----------------------------------------------------------------------
+### Deps ###
+
+require "nrser/log"
+
+## Project / Package ##
 
 require "./exit_status"
 require "./cmd/add"

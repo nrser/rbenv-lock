@@ -5,6 +5,8 @@
 
 ### Deps ###
 
+require "nrser/log"
+
 ### Project / Package ###
 
 require "../exit_status"

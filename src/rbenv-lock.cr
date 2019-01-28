@@ -6,10 +6,8 @@
 #
 ##############################################################################
 
-require "./nrser/reason"
-require "./nrser/log"
-require "./nrser/process"
-require "./rbenv/**"
+require "nrser/log"
+require "rbenv/**"
 
 if ENV.present?( "RBENV_LOCK_DEBUG" )
   {% if flag?( :release ) %}

@@ -6,6 +6,10 @@
 require "yaml"
 require "file_utils"
 
+### Deps ###
+
+require "nrser/log"
+
 ### Project / Package ###
 
 #### Sub-Tree ####

@@ -1,5 +1,8 @@
 require "shards/versions"
 
+require "nrser/log"
+require "nrser/process"
+
 # Namespace
 # =======================================================================
 
@@ -44,15 +47,16 @@ class Client
   @global : String? = nil
   @versions : Array(String)? = nil
   @env_PATH : String? = nil
+  @prefixes = {} of String => String
+  @gem_dirs = {} of String => String
   
   
   # Construction
   # ========================================================================
   
-  def initialize
-    @prefixes = {} of String => String
-    @gem_dirs = {} of String => String
-  end
+  # def initialize
+    
+  # end
   
   
   # Instance Methods
@@ -317,7 +321,7 @@ class Client
   # NOTE **Expensive** on first call due to calling `#versions`.
   # 
   def version_for( requirements : Enumerable(String) ) : String
-    Shards::Versions.resolve( versions, requirements ).last
+    Shards::Versions.resolve( versions, requirements ).first
   end # #version_for requirements
   
   
