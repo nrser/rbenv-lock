@@ -24,7 +24,7 @@ class Update < Base
   
   @@description = %{Update a lock and/or its gem and gemset.}
   
-  @@usage = "rbenv lock update NAME [OPTIONS]"
+  @@usage = "rbenv lock update NAMES... [OPTIONS]"
   
   getter ruby_version : Nil | String = nil
   
@@ -59,11 +59,12 @@ class Update < Base
   
   
   def on_run
-    name = args[0]
-    exe = Rbenv::Lock::Exe.load! name
-    
-    if (ruby_version = self.ruby_version)
-      exe.update_ruby_version ruby_version
+    args.each do |name|
+      exe = Rbenv::Lock::Exe.load! name
+      
+      if (ruby_version = self.ruby_version)
+        exe.update_ruby_version ruby_version
+      end
     end
     
     ExitStatus::OK
