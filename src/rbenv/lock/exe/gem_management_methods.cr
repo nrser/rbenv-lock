@@ -156,7 +156,7 @@ class Exe
     if (gem_name = gem_name?)
       if gem_installed?
         info "Removing gem `#{ gem_name }` from Ruby #{ ruby_version }..."
-        stream "gem", { "uninstall", gem_name }
+        stream "gem", { "uninstall", "--executables", gem_name }
         info "Gem `#{ gem_name }` removed from Ruby #{ ruby_version }."
         true
       else
@@ -168,7 +168,7 @@ class Exe
       warn "Lock `#{ name }` does not have an associated gem, can't remove."
       false
     end
-  end
+  end # #remove_gem
   
 end # class Exe
 
