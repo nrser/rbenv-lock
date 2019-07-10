@@ -7,6 +7,20 @@
 # [.PHONY]: https://stackoverflow.com/a/2145605
 # 
 
+# What rule to run by default when `make` is executed with no arguments.
+# 
+# Defaults to `release` so that `make` will run `make release`.
+# 
+# However, value can be overridden by defining an environment variable. So, 
+# running
+# 
+# 		export RBENV_LOCK_MAKE_DEFAULT=debug
+# 
+# in your shell when devloping will result in `make` executing `make debug`, 
+# saving you those precious, precious characters!
+# 
+RBENV_LOCK_MAKE_DEFAULT ?= release
+
 # > Every Makefile should contain this line: [1][]
 SHELL = /bin/sh
 
@@ -32,8 +46,21 @@ RELEASE_TARGETS := $(OUT)/rbenv-lock-exec-file $(OUT)/rbenv-lock
 export CRYSTAL_PATH := $(shell crystal env CRYSTAL_PATH):src
 
 # [.PHONY][] means `all` is not a file, but just a task (I think...)
-.PHONY: all debug release clean clean-docs serve-docs docs remake spec blah
+.PHONY: default \
+				all \
+				debug \
+				release \
+				clean \
+				clean-docs \
+				serve-docs \
+				docs \
+				remake \
+				spec \
+				prereqs \
+				temp
 
+
+default: ${RBENV_LOCK_MAKE_DEFAULT}
 
 # Build 'em all!
 # 
@@ -43,6 +70,11 @@ export CRYSTAL_PATH := $(shell crystal env CRYSTAL_PATH):src
 all: debug release
 	@echo Everything... MAKED!
 
+# Install depndencies
+prereqs:
+	@echo "Checking \`brew\` available..."
+	type brew 2>&1 >/dev/null
+	
 
 # Turn a Crystal file `//src/<NAME>.cr`
 # to an debug executable `//bin/<NAME>-debug`
@@ -112,8 +144,3 @@ docs: $(DOC_OUT)/*
 
 serve-docs: docs
 	ruby -rwebrick -e'WEBrick::HTTPServer.new(:Port=>8080,:DocumentRoot=>File.expand_path("$(DOCS)")).start'
-	
-
-# Me trying figure out make
-blah:
-	@echo "SOURCES: $(SOURCES)"
