@@ -194,7 +194,9 @@ class Exe
   # You can control which methods are called with the *path*, *gem* and *gemset*
   # `Bool` parameters.
   # 
-  # When a parameter is omitted, 
+  # When a parameter is omitted, each artifact ais removed it exists.
+  # 
+  # Returns a `Hash` reporting which artifacts were removed.
   # 
   def remove(
     path : Bool = path_exists?,
@@ -208,6 +210,48 @@ class Exe
     }
   end # #remove
   
+  
+  # Update the `#ruby_version` of the `Exe`, which removed the current one and
+  # re-creates the new one (since new gems need to be installed).
+  # 
+  # -   *new_ruby_version* is the desired Ruby version as a string.
+  # 
+  # Returns the new `Env` instance.
+  # 
+  def update_ruby_version( new_ruby_version : String ) : self
+    # 1.) Create a new `Exe` with the `#ruby_version` replaced
+    new_exe = self.class.new \
+      name: name,
+      ruby_version: new_ruby_version,
+      target: target,
+      direct: direct?,
+      env: extra_env,
+      gemset: gemset?,
+      gem_name: gem_name?,
+      gem_version: gem_version?,
+      path: path
+    
+    # 2.) Remove the bin file, so that it can be overwritten with the `new_exe`
+    #     We'll put it back if creating the new `Exe` fails.
+    remove_path
+    
+    # 3.) Create the `Exe`, putting the current bin file back if it fails
+    begin
+      new_exe.create
+    rescue error : Error::User
+      # Failed! - put the bin back for the current `Exe` and re-raise to the 
+      # user
+      write bin_only: true
+      raise error
+    end
+    
+    # 4.) Remove everything else for the current `Exe` (except the path, which
+    #     was already removed in (2))
+    remove path: false
+    
+    # 5.) Return the new `Exe`
+    new_exe
+  end # #update_ruby_version
   
 end # class Exe
 

@@ -32,7 +32,7 @@ module Cmd
   
   
   def self.all
-    { Cmd::List, Cmd::Show, Cmd::Add, Cmd::Remove, Cmd::Exec, Cmd::Help }
+    { Cmd::List, Cmd::Show, Cmd::Add, Cmd::Update, Cmd::Remove, Cmd::Exec, Cmd::Help }
   end
   
   
