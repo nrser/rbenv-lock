@@ -28,7 +28,7 @@ module Log
   # ==========================================================================
   
   DEFAULT_FORMATTER = \
-    Logger::Formatter.new do |severity, datetime, progname, message, io|
+    ::Logger::Formatter.new do |severity, datetime, progname, message, io|
       label = severity.unknown? ? "ANY" : severity.to_s
       io << label.ljust( 6 ) << message
     end
@@ -39,7 +39,7 @@ module Log
   
   # Define a macro for each log level (severity, as Cyrs calls 'em)
   # 
-  {% for name in Logger::Severity.constants %}
+  {% for name in ::Logger::Severity.constants %}
     
     macro {{ name.id.downcase }}( message )
           
@@ -52,7 +52,7 @@ module Log
         # this macro to do something... which is grab the call site info and
         # hand off to `#log`.
         log \
-          severity: Logger::Severity::{{ name.id }},
+          severity: ::Logger::Severity::{{ name.id }},
           file_path: \{{ message.filename }},
           line_number: \{{ message.line_number }},
           message: \{{ message }}
@@ -73,7 +73,7 @@ module Log
         # this macro to do something... which is grab the call site info and
         # hand off to `#log`.
         log \
-          severity: Logger::Severity::{{ name.id }},
+          severity: ::Logger::Severity::{{ name.id }},
           file_path: \{{ message.filename }},
           line_number: \{{ message.line_number }},
           message: \{{ message }},
@@ -92,22 +92,23 @@ module Log
   # Define the singleton methods we're gonna need when included.
   # 
   macro included
+    @@logger : ::Logger? = nil
     
-    # Dynamically create the `Logger` instance. Override this to customize
+    # Dynamically create the `::Logger` instance. Override this to customize
     # how it happens (I think that will work? IDK I'm new here...).
     # 
-    def self.logger : Logger
-      @@logger ||= Logger.new \
+    def self.logger : ::Logger
+      @@logger ||= ::Logger.new \
         io: STDERR,
         formatter: NRSER::Log::DEFAULT_FORMATTER,
         level: NRSER::Log.level
     end
     
     
-    # Format the final message and pass off to `.logger`'s `Logger#log`.
+    # Format the final message and pass off to `.logger`'s `::Logger#log`.
     # 
     protected def self.log(
-      severity : Logger::Severity,
+      severity : ::Logger::Severity,
       message : String?,
       values : Hash? = nil,
       file_path : String? = nil,
@@ -167,7 +168,7 @@ module Log
   end # macro included
   
   
-  @@level : Logger::Severity = Logger::INFO
+  @@level : ::Logger::Severity = ::Logger::INFO
   
   
   # Singleton Methods
@@ -194,12 +195,12 @@ module Log
   end
   
   
-  def self.level : Logger::Severity
+  def self.level : ::Logger::Severity
     @@level
   end
   
   
-  def self.level=( level : Logger::Severity )
+  def self.level=( level : ::Logger::Severity )
     @@level = level
   end
   
