@@ -1,6 +1,6 @@
-version: 2.0
+---
+version: 1.0
 shards:
   shards:
     git: https://github.com/crystal-lang/shards.git
     version: 0.9.0.beta+git.commit.4dd6e456eddbc2695c3f8e3e9b20c04d075bbbc8
-
