@@ -7,7 +7,8 @@
 ##############################################################################
 
 require "nrser/log"
-require "rbenv/**"
+require "./rbenv/lock/core_ext/ENV"
+require "./rbenv/lock/run"
 
 if ENV.present?( "RBENV_LOCK_DEBUG" )
   {% if flag?( :release ) %}

@@ -1,3 +1,11 @@
+# Requirements
+# ============================================================================
+
+### Project / Package ###
+
+require "./client"
+
+
 # Namespace
 # =======================================================================
 
@@ -16,7 +24,7 @@ module Rbenv
 #
 # NOTE
 #
-# > ¹ There are some facilites under development to dynamically select exactly
+# > ¹ There are some facilities under development to dynamically select exactly
 # which Ruby to use at execution time, like the support for `ruby-2.3` and such
 # executables that pick the latest Ruby `~> 2.3.0`, allowing scripts to
 # basically say "I need me some Ruby 2.3", and there may perhaps be something
@@ -28,6 +36,7 @@ module Rbenv
 # version.
 #
 module Lock
+  @@rbenv : Client? = nil
   
   # `Client` for interacting with `rbenv`.
   # 

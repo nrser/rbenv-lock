@@ -28,7 +28,7 @@ class Exec < Base
   
   @@examples = [
     {
-      name: %{1. Show the Gem environemnt for a lock},
+      name: %{1. Show the Gem environment for a lock},
       body: \
         %{    rbenv lock exec qb -- gem env\n} \
         %{\n}
@@ -36,7 +36,7 @@ class Exec < Base
   ]
   
   
-  def on_run
+  def on_run : ExitStatus
     name = args[0]
     
     exec_command = double_dash_args[ 0 ]

@@ -59,7 +59,7 @@ class Remove < Base
   end # init_options
   
   
-  def on_run
+  def on_run : ExitStatus
     name = args[0]
     exe = Rbenv::Lock::Exe.load! name
     

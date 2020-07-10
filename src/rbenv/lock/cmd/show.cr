@@ -40,7 +40,7 @@ class Show < Base
   ]
   
   
-  def on_run
+  def on_run : ExitStatus
     name = args[0]
     
     exe = Rbenv::Lock::Exe.load! name

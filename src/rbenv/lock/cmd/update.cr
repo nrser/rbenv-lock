@@ -58,7 +58,7 @@ class Update < Base
   end # init_options
   
   
-  def on_run
+  def on_run : ExitStatus
     args.each do |name|
       exe = Rbenv::Lock::Exe.load! name
       

@@ -141,7 +141,7 @@ class Add < Base
   end
   
   
-  def on_run
+  def on_run : ExitStatus
     if args.size < 2
       raise Error::User::Argument.new \
         "Too FEW arguments (expected 2, found #{ args.size })"

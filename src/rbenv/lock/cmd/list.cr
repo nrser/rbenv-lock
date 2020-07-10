@@ -60,7 +60,7 @@ class List < Base
   end
   
   
-  def on_run
+  def on_run : ExitStatus
     debug "RUNNING `list` command...", args_in: args_in
     
     locks = Rbenv::Lock::Exe.list

@@ -202,9 +202,9 @@ class Client
   
   # Overload to handle splat *args*.
   # 
-  def run!( subcmd, *args : String )
-    run! subcmd, args
-  end
+  # def run!( subcmd, *args : String )
+  #   run! subcmd, args
+  # end
   
   
   # rbenv Command API
@@ -228,7 +228,7 @@ class Client
   # NOTE **Cached** - Cached forever after first call.
   #
   def root : String
-    @root ||= File.expand_path( ENV[ "RBENV_ROOT" ]? || "~/.rbenv" )
+    @root ||= File.expand_path( ENV[ "RBENV_ROOT" ]? || "~/.rbenv", home: true )
   end
   
   
@@ -283,7 +283,7 @@ class Client
   #     #=> ["2.0.0-p353", "2.3.7", "2.4.4", "2.5.1"]
   # 
   def versions : Array(String)
-    @versions ||= run!( :versions, "--bare" ).lines.map( &.chomp )
+    @versions ||= run!( :versions, ["--bare"] ).lines.map( &.chomp )
   end
   
   
@@ -299,7 +299,7 @@ class Client
       if (prefix = uses_standard_prefix?( version ))
         prefix
       else
-        run!( :prefix, version ).chomp
+        run!( :prefix, [version] ).chomp
       end
     end
   end
@@ -344,7 +344,7 @@ class Client
     else
       if uses_standard_prefix?( requirement )
         requirement
-      elsif versions.includes? requirement
+      elsif versions.includes?( requirement )
         requirement
       else
         version_for requirements: { requirement }

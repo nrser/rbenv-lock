@@ -102,7 +102,7 @@ class Exe
                   @ruby_version,
                   @target,
                   @direct = false,
-                  env : Process::Env = nil,
+                  env : Process::Env? = nil,
                   @gemset = nil,
                   @gem_name = nil,
                   @gem_version = nil,

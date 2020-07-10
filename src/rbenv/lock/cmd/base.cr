@@ -10,6 +10,7 @@ require "nrser/log"
 ### Project / Package ###
 
 require "../exit_status"
+require "../env"
 require "../core_ext/option_parser"
 
 

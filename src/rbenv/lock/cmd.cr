@@ -8,12 +8,14 @@ require "nrser/log"
 ## Project / Package ##
 
 require "./exit_status"
+require "./error"
 require "./cmd/add"
 require "./cmd/exec"
 require "./cmd/help"
 require "./cmd/list"
 require "./cmd/remove"
 require "./cmd/show"
+require "./cmd/update"
 
 
 # Namespace
@@ -32,7 +34,15 @@ module Cmd
   
   
   def self.all
-    { Cmd::List, Cmd::Show, Cmd::Add, Cmd::Update, Cmd::Remove, Cmd::Exec, Cmd::Help }
+    {
+      Cmd::List,
+      Cmd::Show,
+      Cmd::Add,
+      Cmd::Update,
+      Cmd::Remove,
+      Cmd::Exec,
+      Cmd::Help,
+    }
   end
   
   
