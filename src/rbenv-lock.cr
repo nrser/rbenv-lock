@@ -16,8 +16,10 @@ if ENV.present?( "RBENV_LOCK_DEBUG" )
     Process.exec command: "#{ Process.executable_path }-debug", args: ARGV
   {% else %}
     # Set the log level
-    NRSER::Log.level = Logger::DEBUG
+    NRSER::Log.level = ::Log::Severity::Debug
   {% end %}
 end
+
+NRSER::Log.setup()
 
 Rbenv::Lock::Run.new( ARGV ).exec
