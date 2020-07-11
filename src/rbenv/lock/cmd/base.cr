@@ -67,7 +67,7 @@ abstract class Base
   
   def self.examples_string
     String.build do |io|
-      @@examples.join( '\n', io ) { |example, io|
+      @@examples.join( io, '\n'  ) { |example, io|
         io << example[ :name ] << "\n\n"
         
         example[ :body ].
