@@ -202,9 +202,9 @@ class Client
   
   # Overload to handle splat *args*.
   # 
-  # def run!( subcmd, *args : String )
-  #   run! subcmd, args
-  # end
+  def run!( subcmd, *args : String )
+    run! subcmd, args
+  end
   
   
   # rbenv Command API
@@ -283,7 +283,7 @@ class Client
   #     #=> ["2.0.0-p353", "2.3.7", "2.4.4", "2.5.1"]
   # 
   def versions : Array(String)
-    @versions ||= run!( :versions, ["--bare"] ).lines.map( &.chomp )
+    @versions ||= run!( :versions, "--bare" ).lines.map( &.chomp )
   end
   
   
