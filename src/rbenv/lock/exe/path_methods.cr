@@ -69,22 +69,10 @@ class Exe
   # the entry point when running lock executables, and as such is the "shebang"
   # target for lock executable files.
   # 
-  # NOTE **$$$** - Needs the rbenv root, and calls `Rbenv::Client#root`, which
-  # shells-out to get it (on first call only).
-  # 
   # TODO Might be nice to be configurable.
   # 
   def self.exec_file_bin_path : String
-    if path = Process.executable_path
-      File.join File.dirname( path ), "rbenv-lock-exec-file"
-    else
-      File.join \
-        Lock.rbenv.root,
-        "plugins",
-        "rbenv-lock",
-        "bin",
-        "rbenv-lock-exec-file"
-    end
+    "rbenv-lock-exec-file"
   end
   
   
