@@ -34,7 +34,7 @@ class Show < Base
     {
       name: %{1. Basic usage},
       body: \
-        %{    rbenv lock status qb\n} \
+        %{    rbenv lock show qb\n} \
         %{\n}
     },
   ]
