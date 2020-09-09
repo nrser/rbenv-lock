@@ -81,6 +81,8 @@ abstract class Base
   # Instance Variables
   # ==========================================================================
   
+  @name_arg : String?
+  
   # Non-flag arguments *before* any `--`; only available after `parse!`
   @args : Array(String)
   
@@ -115,6 +117,7 @@ abstract class Base
   # ==========================================================================
   
   def initialize(
+    @name_arg : String?,
     @args_in : Array( String ),
     @out_io : IO = STDOUT,
     @err_io : IO = STDERR,

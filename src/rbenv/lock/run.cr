@@ -50,7 +50,7 @@ class Run
     debug "Starting run..."
     
     if args_in.empty?
-      cmd_name = "help"
+      cmd_name = nil
       cmd_args = [] of String
     else
       cmd_name = args_in[ 0 ]
@@ -61,7 +61,10 @@ class Run
     
     cmd_class = Cmd.find! cmd_name
     
-    cmd = @cmd = cmd_class.new( cmd_args, out_io: out_io, err_io: err_io )
+    cmd = @cmd = cmd_class.new( cmd_name,
+                                cmd_args,
+                                out_io: out_io,
+                                err_io: err_io )
     
     cmd.run!
   end

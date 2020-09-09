@@ -62,10 +62,10 @@ END
     
     if args.empty?
       general
-      return ExitStatus::FAIL
+      return (@name_arg.nil? ? ExitStatus::FAIL : ExitStatus::OK)
     end
     
-    Cmd.find!( args[ 0 ] ).new( [ "--help" ] ).run!
+    Cmd.find!( args[ 0 ] ).new( args[ 0 ], [ "--help" ] ).run!
   end
   
 end # class Help

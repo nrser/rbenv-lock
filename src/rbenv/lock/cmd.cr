@@ -51,19 +51,23 @@ module Cmd
   end
   
   
-  def self.find( name : String )
-    all.find { |cmd_class|
-      debug "Checking command names for match...",
-        cmd_class: cmd_class,
-        names: cmd_class.names,
-        name: name
-    
-      cmd_class.names.includes? name
-    }
+  def self.find( name : String? )
+    if name.nil?
+      Cmd::Help
+    else
+      all.find { |cmd_class|
+        debug "Checking command names for match...",
+          cmd_class: cmd_class,
+          names: cmd_class.names,
+          name: name
+      
+        cmd_class.names.includes? name
+      }
+    end
   end
   
   
-  def self.find!( name : String )
+  def self.find!( name : String? )
     find( name ).
       tap { |cmd_class|
         if cmd_class.nil?
