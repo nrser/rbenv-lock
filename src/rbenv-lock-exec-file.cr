@@ -15,7 +15,7 @@
 # program.
 #
 # NOTE  This redirection approach seems to add about 30-40ms overhead on my box
-#       (compiled with `--release`), which is ain't bad considering just getitng
+#       (compiled with `--release`), which is ain't bad considering just getting
 #       a `puts` out of a Crystal binary seems to cost ~20ms for me, and is
 #       **much** nicer than the 200ms or so I was spending going through the
 #       system Ruby.
