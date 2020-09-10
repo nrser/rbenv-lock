@@ -28,9 +28,19 @@ class Help < Base
   
   @@usage = "rbenv lock help [COMMAND]"
   
+  property? usage : Bool = false
   
-  def general
+  def print_plugin_usage!
+    out!  "Usage: rbenv lock " +
+          Cmd.all.map {|c| c.canonical_name }.join( "|" ) +
+          " [ARGS...] [OPTIONS]"
+  end
+  
+  def print_plugin_help!
     out! <<-END
+`rbenv lock` Command
+====================
+
 Mange "locks" - small executable scripts (like shims) placed in
 
     #{ Rbenv::Lock::Exe.dir }/<BIN>
@@ -56,16 +66,65 @@ END
     end
   end
   
+  protected def init_options( parser ) : Nil
+    # Define `--usage` ourselves, so Base skips it, 'cause it causes an early
+    # termination at parsing.
+    parser.on(
+      "--usage",
+      "Print usage and exit.",
+    ) { @usage = true }
+  end
   
   def on_run : ExitStatus
     args = @args
     
-    if args.empty?
-      general
-      return (@name_arg.nil? ? ExitStatus::FAIL : ExitStatus::OK)
+    case
+    when args.empty? && !usage?
+      # With no args **and** no usage **always** prints plugin help. Any of
+      # these:
+      # 
+      # 1.  `$ rbenv lock               # => name_arg=nil, args=[]`
+      # 2.  `$ rbenv lock [-h|--help]   # => name_arg=<flag>, args=[]`
+      # 3.  `$ rbenv lock help          # => name_arg="help", args=[]`
+      # 
+      print_plugin_help!
+      # However, *success* depends on *how* it happen:
+      # 
+      # 1.  `$ rbenv lock               # => FAIL
+      # 2.  `$ rbenv lock [-h|--help]   # => OK
+      # 3.  `$ rbenv lock help          # => OK
+      # 
+      # Basically, `rbenv lock` is an error, since used in another program it
+      # almost certainly indicates a typo or misunderstanding rather than 
+      # trying to print the plugin help.
+      # 
+      (name_arg.nil? ? ExitStatus::FAIL : ExitStatus::OK)
+      
+    when args.empty? && usage? && name_arg.nil?
+      # This case, which is OK to get plugin usage
+      # 
+      #     $ rbenv lock --usage
+      # 
+      print_plugin_usage!
+      ExitStatus::OK
+      
+    when args.empty? && usage? && !name_arg.nil?
+      # This case, which is OK to get help command usage
+      # 
+      #     $ rbenv lock [-h|--help|help] --usage
+      # 
+      out! self.class.usage
+      ExitStatus::OK
+      
+    else
+      # We have a command to delegate to, like:
+      # 
+      #     $ rbenv lock help [--usage] add
+      # 
+      Cmd.find!( args[ 0 ] )
+        .new( args[ 0 ], [ usage? ? "--usage" : "--help" ] )
+        .run!
     end
-    
-    Cmd.find!( args[ 0 ] ).new( args[ 0 ], [ "--help" ] ).run!
   end
   
 end # class Help

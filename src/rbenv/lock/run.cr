@@ -49,9 +49,9 @@ class Run
   def run! : ExitStatus
     debug "Starting run..."
     
-    if args_in.empty?
+    if args_in.empty? || (args_in.size == 1 && args_in[0] == "--usage")
       cmd_name = nil
-      cmd_args = [] of String
+      cmd_args = args_in.dup
     else
       cmd_name = args_in[ 0 ]
       cmd_args = args_in[ 1..-1 ]

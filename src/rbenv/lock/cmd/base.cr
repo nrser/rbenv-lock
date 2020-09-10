@@ -78,10 +78,13 @@ abstract class Base
   end
   
   
+  def self.usage : String
+    "Usage: #{@@usage}"
+  end
+  
+  
   # Instance Variables
   # ==========================================================================
-  
-  @name_arg : String?
   
   # Non-flag arguments *before* any `--`; only available after `parse!`
   @args : Array(String)
@@ -96,6 +99,8 @@ abstract class Base
   
   # Properties
   # ==========================================================================
+  
+  getter name_arg : String? = nil
   
   # All input arguments
   getter args_in : Array(String)
@@ -176,7 +181,7 @@ abstract class Base
       Rbenv::Lock::Env[ :quiet ] = 1
     end
     
-    parser.on(
+    parser.add(
       "-d", "--debug",
       "Enable debug output (to STDERR).",
       " ",
@@ -188,9 +193,17 @@ abstract class Base
       Rbenv::Lock::Env[ :debug ] = 1
     end
     
-    parser.on(
+    parser.add(
+      "--usage",
+      "Print usage and exit.",
+    ) do
+      out! self.class.usage
+      self.status = ExitStatus::OK
+    end
+    
+    parser.add(
       "-h", "--help",
-      "Show this message",
+      "Print help and exit.",
       " ",
     ) do
       out! parser
