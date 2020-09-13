@@ -49,20 +49,25 @@ class Run
   def run! : ExitStatus
     debug "Starting run..."
     
-    if args_in.empty? || (args_in.size == 1 && args_in[0] == "--usage")
-      cmd_name = nil
-      cmd_args = args_in.dup
-    else
-      cmd_name = args_in[ 0 ]
-      cmd_args = args_in[ 1..-1 ]
+    pair = args_in.each_with_index.find do |arg_in, index|
+      arg_in == "-h" || arg_in == "--help" || arg_in[0] != '-'
     end
     
-    debug "Processed command", cmd_name: cmd_name, cmd_args: cmd_args
+    cmd_args_in = args_in.dup
     
-    cmd_class = Cmd.find! cmd_name
+    if pair.nil?
+      cmd_name_arg = nil
+    else
+      cmd_name_arg, index = pair
+      cmd_args_in.delete_at index
+    end
     
-    cmd = @cmd = cmd_class.new( cmd_name,
-                                cmd_args,
+    debug "Processed command", name_arg: cmd_name_arg, args_in: cmd_args_in
+    
+    cmd_class = Cmd.find! cmd_name_arg
+    
+    cmd = @cmd = cmd_class.new( cmd_name_arg,
+                                cmd_args_in,
                                 out_io: out_io,
                                 err_io: err_io )
     
@@ -76,12 +81,17 @@ class Run
       
     rescue e : Error::User
       fatal e.message
-      err_io.puts "For help:\n"
+      
       if (cmd = self.cmd)
-        err_io.puts "    rbenv lock help #{ cmd.class.canonical_name }\n"
+        usage = cmd.class.usage
+        help = "rbenv lock #{ cmd.class.canonical_name } --help"
       else
-        err_io.puts "    rbenv lock help \n"
+        usage = Cmd::Help.usage
+        help = "rbenv lock help"
       end
+      
+      err_io.puts usage
+      err_io.puts "Additional help:\n    #{help}\n"
       
       ExitStatus::FAIL
       

@@ -21,7 +21,13 @@ module Cmd
 # 
 class Help < Base
   
-  @@aliases = [ "-h", "--help" ]
+  def self.plugin_usage : String
+    "Usage: rbenv lock " +
+      Cmd.all.map {|c| c.canonical_name }.to_a.sort.join( "|" ) +
+      " [-h|--help] ..."
+  end
+  
+  # @@aliases = [ "-h", "--help" ]
   
   @@description = \
     "Get help on `rbenv lock` in general or about a specific command."
@@ -30,14 +36,8 @@ class Help < Base
   
   property? usage : Bool = false
   
-  def print_plugin_usage!
-    out!  "Usage: rbenv lock " +
-          Cmd.all.map {|c| c.canonical_name }.join( "|" ) +
-          " [ARGS...] [OPTIONS]"
-  end
-  
-  def print_plugin_help!
-    out! <<-END
+  def print_plugin_help!( io : IO = @out_io )
+    io.puts <<-END
 `rbenv lock` Command
 ====================
 
@@ -60,10 +60,12 @@ Commands:
 END
   
     Cmd.all.each do |cmd_class|
-      out! "  #{ cmd_class.usage }"
-      out! "    #{ cmd_class.description }"
-      out!
+      io.puts "  #{ cmd_class.usage }"
+      io.puts "    #{ cmd_class.description }"
+      io.puts
     end
+    
+    io.flush
   end
   
   protected def init_options( parser ) : Nil
@@ -105,7 +107,7 @@ END
       # 
       #     $ rbenv lock --usage
       # 
-      print_plugin_usage!
+      out! self.class.plugin_usage
       ExitStatus::OK
       
     when args.empty? && usage? && !name_arg.nil?
@@ -121,8 +123,16 @@ END
       # 
       #     $ rbenv lock help [--usage] add
       # 
+      # which "re-writes" to
+      # 
+      #     $ rbenv lock add --usage|--help
+      # 
+      # *except* with
+      # 
+      #     $ rbenv lock help --usage -h|--help
+      # 
       Cmd.find!( args[ 0 ] )
-        .new( args[ 0 ], [ usage? ? "--usage" : "--help" ] )
+        .new( args[ 0 ], [ usage? ? "--usage" : "--help" ], out_io, err_io )
         .run!
     end
   end

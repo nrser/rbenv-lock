@@ -52,7 +52,7 @@ module Cmd
   
   
   def self.find( name : String? )
-    if name.nil?
+    if name.nil? || name == "-h" || name == "--help"
       Cmd::Help
     else
       all.find { |cmd_class|
