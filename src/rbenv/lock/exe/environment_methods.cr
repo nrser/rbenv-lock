@@ -1,5 +1,5 @@
 ##############################################################################
-# `Rbenv::Lock::Exe` Envrionemnt Methods
+# `Rbenv::Lock::Exe` Environment Methods
 # ============================================================================
 # 
 # The `//src/rbenv/lock/exe.cr` file got a bit big and unwieldy by my standards,
@@ -12,6 +12,7 @@
 ##############################################################################
 
 require "../core_ext/hash"
+require "../core_ext/ENV"
 
 # Namespace
 # =======================================================================
