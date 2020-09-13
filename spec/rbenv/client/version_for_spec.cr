@@ -2,7 +2,7 @@ require "../../spec_helper"
 require "rbenv/client"
 
 class Rbenv::Client
-  def initialize( @versions )
+  def initialize( @versions = nil )
   end
 end
 
