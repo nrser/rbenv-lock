@@ -34,6 +34,8 @@ SRC=./src
 OUT=./bin
 DOC_OUT=./site
 
+SPEC_OPTS ?= # --verbose
+
 # All the Crystal files. We depend on all of these for compilation so that 
 # it triggers when any change.
 SOURCES := $(shell find $(SRC) -name '*.cr')
@@ -70,7 +72,7 @@ default: ${RBENV_LOCK_MAKE_DEFAULT}
 all: debug release
 	@echo Everything... MAKED!
 
-# Install depndencies
+# Install dependencies
 prereqs:
 	@echo "Checking \`brew\` available..."
 	type brew 2>&1 >/dev/null
@@ -121,7 +123,7 @@ remake: clean all
 
 
 spec:
-	crystal spec
+	crystal spec $(SPEC_OPTS)
 
 
 clean-docs:
